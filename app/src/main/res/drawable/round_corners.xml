@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <corners android:radius="50dp" /> <!-- Change this value for more or less rounding -->
+    <solid android:color="#004481" /> <!-- Background color -->
+</shape>

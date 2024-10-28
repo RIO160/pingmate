@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/gradient_color">
+
+    <TextView
+        android:id="@+id/Signout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/signout"
+        android:textColor="#ffffff" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/profiletab">
+
+        <TableRow>
+            <ImageView
+                android:id="@+id/profile"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_below="@+id/Signout"
+                android:layout_marginTop="15dp"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:background="@drawable/cricle"
+                android:contentDescription="App Logo"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ping_mate"/>
+
+            <TextView
+                android:id="@+id/usernameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="90dp"
+                android:textColor="#ffffff"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+
+        </TableRow>
+
+    </TableLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="530dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/chat_background"
+        android:backgroundTint="#004481"
+        android:layout_below="@+id/profiletab"
+        >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/userRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginTop="16dp" />
+
+    </FrameLayout>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNewchat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginBottom="15dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/round_add_24"
+        android:backgroundTint="@color/white"
+        app:tint="@color/black"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        app:shapeAppearanceOverlay="@style/CustomFABShape"
+        />
+
+
+<!--            <ImageView-->
+<!--                android:id="@+id/Logo"-->
+<!--                android:layout_width="50dp"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_column="0"-->
+<!--                android:background="@drawable/cricle"-->
+<!--                android:contentDescription="App Logo"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:src="@drawable/ping_mate" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/AD"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_column="1"-->
+<!--                android:layout_marginTop="12dp"-->
+<!--                android:clickable="true"-->
+<!--                android:paddingLeft="70dp"-->
+<!--                android:text="Adrian Delos Santos"-->
+<!--                android:textColor="#ffff" />-->
+
+<!--            <TableLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="30dp">-->
+
+<!--                <TableRow>-->
+<!--                    <TextView-->
+<!--                        android:id="@+id/ADsend"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_row="0"-->
+<!--                        android:layout_column="1"-->
+<!--                        android:layout_below="@id/AD"-->
+<!--                        android:layout_marginTop="1dp"-->
+<!--                        android:clickable="true"-->
+<!--                        android:paddingLeft="70dp"-->
+<!--                        android:text="San kana?"-->
+<!--                        android:textColor="#80ffffff" />-->
+
+<!--                    <TextView-->
+<!--                        android:id="@+id/ADtime"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_row="0"-->
+<!--                        android:layout_column="1"-->
+<!--                        android:layout_below="@id/AD"-->
+<!--                        android:layout_marginTop="1dp"-->
+<!--                        android:clickable="true"-->
+<!--                        android:paddingLeft="17dp"-->
+<!--                        android:text="11mins"-->
+<!--                        android:textColor="#80ffffff" />-->
+<!--                </TableRow>-->
+<!--            </TableLayout>-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/Logo2"-->
+<!--                android:layout_width="50dp"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:layout_below="@+id/Logo"-->
+<!--                android:layout_marginTop="15dp"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_column="0"-->
+<!--                android:background="@drawable/cricle"-->
+<!--                android:contentDescription="App Logo"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:src="@drawable/ping_mate" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/Nt"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_column="1"-->
+<!--                android:layout_below="@+id/AD"-->
+<!--                android:layout_marginTop="45dp"-->
+<!--                android:clickable="true"-->
+<!--                android:paddingLeft="70dp"-->
+<!--                android:text="Nathan Rabanal"-->
+<!--                android:textColor="#ffff" />-->
+
+<!--            <TableLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="95dp">-->
+
+<!--                <TableRow>-->
+<!--                    <TextView-->
+<!--                        android:id="@+id/Ntsend"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_row="0"-->
+<!--                        android:layout_column="1"-->
+<!--                        android:layout_below="@id/AD"-->
+<!--                        android:layout_marginTop="1dp"-->
+<!--                        android:clickable="true"-->
+<!--                        android:paddingLeft="70dp"-->
+<!--                        android:text="Uyy calltime natin..."-->
+<!--                        android:textColor="#80ffffff" />-->
+
+<!--                    <TextView-->
+<!--                        android:id="@+id/Nttime"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_row="0"-->
+<!--                        android:layout_column="1"-->
+<!--                        android:layout_below="@id/AD"-->
+<!--                        android:layout_marginTop="1dp"-->
+<!--                        android:clickable="true"-->
+<!--                        android:paddingLeft="17dp"-->
+<!--                        android:text="15mins"-->
+<!--                        android:textColor="#80ffffff" />-->
+<!--                </TableRow>-->
+<!--            </TableLayout>-->
+
+</RelativeLayout>

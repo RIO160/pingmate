@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1074741792682",
+    "project_id": "pingmate-15701",
+    "storage_bucket": "pingmate-15701.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1074741792682:android:7c0d8d12b97cdb4479a5d3",
+        "android_client_info": {
+          "package_name": "com.example.pingmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOHftH1t0PN7taZiGiHKUdFwSRH6CmCbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
