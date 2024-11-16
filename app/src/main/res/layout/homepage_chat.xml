@@ -6,51 +6,42 @@
     android:padding="16dp"
     android:background="@drawable/gradient_color">
 
-    <TextView
-        android:id="@+id/Signout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:layout_marginStart="300dp"
-        android:layout_marginTop="30dp"
-        android:text="@string/signout"
-        android:textColor="#ffffff" />
-
-    <TableLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/profiletab">
 
-        <TableRow>
             <ImageView
                 android:id="@+id/profile"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_below="@+id/Signout"
-                android:layout_marginTop="15dp"
-                android:layout_row="0"
-                android:layout_column="0"
-                android:background="@drawable/cricle"
+                android:layout_marginTop="1dp"
+                android:background="@drawable/image_user2"
                 android:contentDescription="App Logo"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ping_mate"/>
+                android:scaleType="centerCrop"/>
 
             <TextView
                 android:id="@+id/usernameTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_row="0"
-                android:layout_column="1"
                 android:layout_marginTop="30dp"
+                android:layout_centerInParent="true"
                 android:layout_marginStart="90dp"
                 android:textColor="#ffffff"
                 android:textSize="18sp"
                 android:textStyle="bold"/>
 
+            <TextView
+                android:id="@+id/Signout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:layout_marginStart="315dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/signout"
+                android:textColor="#ffffff" />
 
-        </TableRow>
-
-    </TableLayout>
+    </RelativeLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -67,6 +58,7 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:orientation="vertical"
+            android:clickable="true"
             android:padding="20dp"
             android:layout_marginTop="16dp" />
 

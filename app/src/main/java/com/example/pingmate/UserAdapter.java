@@ -9,39 +9,37 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private List<Users> userList;
-    private Context context;
-    private OnUserClickListener onUserClickListener;
+    private OnUserClickListener onUserCLickListener;
 
-    public UserAdapter(List<Users> userList,  UserAdapter.OnUserClickListener onUserClickListener) {
+
+    public UserAdapter(List<Users> userList, OnUserClickListener onUserClickListener) {
         this.userList = userList;
-        this.context = context;
-        this.onUserClickListener = onUserClickListener;
+        this.onUserCLickListener = onUserClickListener;
     }
 
     @NonNull
     @Override
     public UserAdapter.UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
         return new UserViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(UserViewHolder holder, int position) {
         Users user = userList.get(position);
-        //holder.username.setText(user.getUsername());
+        holder.username.setText(user.getUsername());
+        holder.email.setText((user.getEmail()));
 
-        holder.itemView.setOnClickListener(v -> {
-            // Open a chat with this user
-            onUserClickListener.onUserClick(user);
-//            Intent intent = new Intent(context, ChatPage.class);
-//            intent.putExtra("userId", user.getUsername());
-                
-//            context.startActivity(intent);
-        });
+        //handlee click event
+        holder.itemView.setOnClickListener(view -> onUserCLickListener.onUserClick(user));
+
     }
 
     @Override
@@ -51,15 +49,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView username;
+        TextView email;
+        ImageView profilePic;
 
         public UserViewHolder(View itemView) {
             super(itemView);
             username = itemView.findViewById(R.id.usernameTextView);
-
+            email = itemView.findViewById(R.id.emailTextView);
+            profilePic = itemView.findViewById(R.id.profilePic);
         }
     }
 
-    public interface OnUserClickListener {
+    public interface OnUserClickListener{
         void onUserClick(Users user);
     }
 }
