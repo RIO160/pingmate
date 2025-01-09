@@ -3,15 +3,17 @@ package com.example.pingmate;
 public class chatMessage {
     private String message;
     private String senderId;
+    private String username;
     private long timestamp;
 
     public chatMessage(){
 
     }
 
-    public chatMessage(String message, String senderId, long timestamp) {
+    public chatMessage(String message, String senderId, String username, long timestamp) {
         this.message = message;
         this.senderId = senderId;
+        this.username = username;
         this.timestamp = timestamp;
     }
 
@@ -30,6 +32,10 @@ public class chatMessage {
 
     public void setSenderId(String senderId) {
         this.senderId = senderId;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public long getTimestamp() {

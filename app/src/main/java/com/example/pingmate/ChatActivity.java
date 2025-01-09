@@ -78,7 +78,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void loadChatMessages() {
+        String currentUserId = firebaseAuth.getCurrentUser().getUid();
         firestore.collection("chats")
+                .document(currentUserId)
+                .collection("messages")
                 .orderBy("timestamp")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -107,14 +110,24 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
+        String currentUserId = firebaseAuth.getCurrentUser().getUid();
+        String username = getIntent().getStringExtra("clickedUsername");
         chatMessage chatMessage = new chatMessage(
                 message,
-                firebaseAuth.getCurrentUser().getUid(),
+                currentUserId,
+                username,
                 System.currentTimeMillis()
         );
 
-        firestore.collection("chats").add(chatMessage)
+        firestore.collection("chats")
+                .document(currentUserId)
+                .collection("messages")
+                .add(chatMessage)
                 .addOnSuccessListener(aVoid -> messageEditText.setText(""))
-                .addOnFailureListener(e -> Toast.makeText(ChatActivity.this, "Error sending message", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ChatActivity.this, "Error sending message", Toast.LENGTH_SHORT).show();
+                    Log.e("Firestore", "Error sending message", e);
+                });
+
     }
 }

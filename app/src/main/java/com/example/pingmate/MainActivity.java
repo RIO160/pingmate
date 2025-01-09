@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity{
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(user).matches()){
-            Username.setError("Please enter your username");
+            Username.setError("Please enter a valid email address");
             Username.requestFocus();
             return;
         }

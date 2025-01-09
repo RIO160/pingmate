@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:background="@drawable/round_corners"
-        android:backgroundTint="#ffffff"
         android:padding="10dp"
         android:textColor="@android:color/white" />
 

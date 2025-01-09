@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath ("com.android.tools.build:gradle:8.1.2") // Ensure this matches your Gradle version
+        classpath ("com.android.tools.build:gradle:8.7.3") // Ensure this matches your Gradle version
         classpath ("com.google.gms:google-services:4.4.2") // Add this line
     }
 }

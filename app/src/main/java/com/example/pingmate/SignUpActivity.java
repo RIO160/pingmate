@@ -120,7 +120,7 @@ public class SignUpActivity extends AppCompatActivity{
         }
 
         if (password.length() < 8){
-            SignupPassword.setError("Password must be at least 6 characters");
+            SignupPassword.setError("Password must be at least 8 characters");
             SignupPassword.requestFocus();
             return;
         }

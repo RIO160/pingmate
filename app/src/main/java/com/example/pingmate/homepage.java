@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -65,12 +66,11 @@ public class homepage extends AppCompatActivity {
         Signout = findViewById(R.id.Signout);
         usernameTextView = findViewById(R.id.usernameTextView); // Reference to the username TextView
 
-        fabNewchat = findViewById(R.id.fabNewchat);
+        FloatingActionButton fabNewchat = findViewById(R.id.fabNewChat);
         fabNewchat.setOnClickListener(view -> {
             Intent intent = new Intent(homepage.this, GroupCreationActivity.class);
             startActivity(intent);
         });
-
 
         fetchUsername(); // Call this method to fetch and display username
         fetchUsers(); // cal this method to fetch and display username\

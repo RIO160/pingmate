@@ -3,6 +3,7 @@
     package="com.example.pingmate">
     
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -27,6 +28,7 @@
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".homepage" />
         <activity android:name=".ChatActivity" />
+        <activity android:name=".GroupCreationActivity" />
 
         <service
             android:name=".messaging_service"
