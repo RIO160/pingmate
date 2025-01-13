@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.pingmate.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -56,8 +57,17 @@ public class homepage extends AppCompatActivity {
         userAdapter = new UserAdapter(userList, user -> {
             // Handle the click event
             String clickedUsername = user.getUsername(); // Get the clicked user's username
+            String receiverId = user.getId(); // Get the receiver's UID
+
+            // Validate receiverId before starting the ChatActivity
+            if (receiverId == null || receiverId.isEmpty()) {
+                Toast.makeText(homepage.this, "Receiver ID is missing for this user", Toast.LENGTH_SHORT).show();
+                return; // Stop here if receiverId is invalid
+            }
+
             Intent intent = new Intent(homepage.this, ChatActivity.class);
-            intent.putExtra("clickedUsername", clickedUsername); // Pass username to ChatActivity
+            intent.putExtra("clickedUsername", clickedUsername); // Pass username
+            intent.putExtra("receiverId", receiverId); // Pass receiverId to ChatActivity
             startActivity(intent);
         });
 
@@ -71,6 +81,7 @@ public class homepage extends AppCompatActivity {
             Intent intent = new Intent(homepage.this, GroupCreationActivity.class);
             startActivity(intent);
         });
+
 
         fetchUsername(); // Call this method to fetch and display username
         fetchUsers(); // cal this method to fetch and display username\
@@ -101,22 +112,25 @@ public class homepage extends AppCompatActivity {
 
     private void fetchUsers(){
         String currentUserId = firebaseAuth.getCurrentUser().getUid();
-        // Fetch all users from Firestore
+
         db.collection("users").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Users> allUsers = new ArrayList<>();
 
-                    // Loop through all users in Firestore
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
                         Users user = document.toObject(Users.class);
 
-                        // Exclude the current logged-in user
-                        if (!document.getId().equals(currentUserId)) {
-                            allUsers.add(user);
+                        if (user != null) {
+                            // Use Firestore's document ID as the user ID
+                            user.setId(document.getId());
+
+                            // Exclude the current logged-in user
+                            if (!user.getId().equals(currentUserId)) {
+                                allUsers.add(user);
+                            }
                         }
                     }
 
-                    // Update the RecyclerView with the list of other users
                     userList.clear();
                     userList.addAll(allUsers);
                     userAdapter.notifyDataSetChanged();
@@ -133,7 +147,6 @@ public class homepage extends AppCompatActivity {
                         String groupName = snapshot.getString("groupName");
                         groupNames.add(groupName);
                     }
-                    displayGroupChats(groupNames);
                 })
                 .addOnFailureListener(e -> Log.w("Firestore", "error fetching groups"));
     }

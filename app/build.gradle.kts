@@ -1,6 +1,7 @@
 plugins {
     id("com.google.gms.google-services")
     alias(libs.plugins.android.application)
+
 }
 
 android {
@@ -51,4 +52,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:20.0.0")
     implementation("com.google.firebase:firebase-database:20.0.0")
     implementation("com.google.android.material:material:1.9.0")
+    implementation ("com.google.firebase:firebase-auth:21.0.5")  // For Firebase Authentication
+    implementation ("com.google.firebase:firebase-firestore:24.0.1")  // For Firestore
+    implementation ("com.google.firebase:firebase-messaging:23.1.1")  // For FCM
 }

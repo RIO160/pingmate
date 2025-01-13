@@ -1,10 +1,13 @@
 package com.example.pingmate;
 
+import java.util.List;
+
 public class chatMessage {
-    private String message;
-    private String senderId;
-    private String username;
-    private long timestamp;
+    private String message = "";
+    private String senderId = "";
+    private String username = "";
+    private long timestamp = 0;
+    private String receiverId;
 
     public chatMessage(){
 
@@ -15,6 +18,7 @@ public class chatMessage {
         this.senderId = senderId;
         this.username = username;
         this.timestamp = timestamp;
+        this.receiverId = receiverId;
     }
 
     // Getters and setters for each field
@@ -45,4 +49,8 @@ public class chatMessage {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    public String getReceiverId() {return receiverId;}
+
+
 }

@@ -10,35 +10,48 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
+public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<chatMessage> chatMessageList;
     private String currentUserId;
+    private static final int VIEW_TYPE_SENT = 1;
+    private static final int VIEW_TYPE_RECEIVED = 2;
 
     public ChatAdapter(List<chatMessage> chatMessageList, String currentUserId) {
         this.chatMessageList = chatMessageList;
         this.currentUserId = currentUserId;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        chatMessage message = chatMessageList.get(position);
+        if (message.getSenderId().equals(currentUserId)) {
+            return VIEW_TYPE_SENT; // For sender
+        } else {
+            return VIEW_TYPE_RECEIVED; // For receiver
+        }
+    }
+
     @NonNull
     @Override
-    public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_message, parent, false);
-        return new ChatViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SENT) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_sent, parent, false);
+            return new SentMessageViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_received, parent, false);
+            return new ReceivedMessageViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         chatMessage chatMessage = chatMessageList.get(position);
 
-        if (chatMessage.getSenderId().equals(currentUserId)) {
-            // Display the message on the right side
-            holder.messageTextView.setText(chatMessage.getMessage());
-            holder.messageTextView.setBackgroundResource(R.drawable.message_bubble_right);
-        } else {
-            // Display the message on the left side
-            holder.messageTextView.setText(chatMessage.getMessage());
-            holder.messageTextView.setBackgroundResource(R.drawable.message_bubble_left);
+        if (holder instanceof SentMessageViewHolder) {
+            ((SentMessageViewHolder) holder).bind(chatMessage);
+        } else if (holder instanceof ReceivedMessageViewHolder) {
+            ((ReceivedMessageViewHolder) holder).bind(chatMessage);
         }
     }
 
@@ -47,12 +60,29 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         return chatMessageList.size();
     }
 
-    public static class ChatViewHolder extends RecyclerView.ViewHolder {
-        TextView messageTextView;
+    public class SentMessageViewHolder extends RecyclerView.ViewHolder {
+        private TextView messageTextView;
 
-        public ChatViewHolder(@NonNull View itemView) {
+        public SentMessageViewHolder(View itemView) {
             super(itemView);
             messageTextView = itemView.findViewById(R.id.messageTextView);
+        }
+
+        public void bind(chatMessage message) {
+            messageTextView.setText(message.getMessage());
+        }
+    }
+
+    public class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
+        private TextView messageTextView;
+
+        public ReceivedMessageViewHolder(View itemView) {
+            super(itemView);
+            messageTextView = itemView.findViewById(R.id.messageTextView);
+        }
+
+        public void bind(chatMessage message) {
+            messageTextView.setText(message.getMessage());
         }
     }
 }

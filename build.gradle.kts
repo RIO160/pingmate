@@ -6,7 +6,9 @@ buildscript {
     }
     dependencies {
         classpath ("com.android.tools.build:gradle:8.7.3") // Ensure this matches your Gradle version
-        classpath ("com.google.gms:google-services:4.4.2") // Add this line
+        classpath ("com.google.gms:google-services:4.4.2")
+        classpath ("com.google.gms:google-services:4.3.13") // or the latest version
+// Add this line
     }
 }
 

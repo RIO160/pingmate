@@ -43,6 +43,7 @@
         android:background="@drawable/round_corners"
         android:drawableStart="@drawable/image_user"
         android:drawablePadding="8dp"
+        android:textColor="#FFFFFF"
         android:textColorHint="#80ffffff"
         android:inputType="text"/>
 
@@ -58,6 +59,7 @@
         android:background="@drawable/round_corners"
         android:drawableStart="@drawable/image_padlock"
         android:drawablePadding="8dp"
+        android:textColor="#FFFFFF"
         android:textColorHint="#80ffffff"
         android:inputType="textPassword"/>
 
