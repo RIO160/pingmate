@@ -3,4 +3,8 @@
     <style name="CustomFABShape" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerSize">50dp</item>
     </style>
+    <style name="CircleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

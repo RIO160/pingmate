@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,6 +80,12 @@ public class homepage extends AppCompatActivity {
         FloatingActionButton fabNewchat = findViewById(R.id.fabNewChat);
         fabNewchat.setOnClickListener(view -> {
             Intent intent = new Intent(homepage.this, GroupCreationActivity.class);
+            startActivity(intent);
+        });
+
+        ImageView profileEdit = findViewById(R.id.profile);
+        profileEdit.setOnClickListener(view -> {
+            Intent intent = new Intent(homepage.this, ProfileEditActivity.class);
             startActivity(intent);
         });
 

@@ -1,5 +1,6 @@
 package com.example.pingmate;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton sendButton;
     private ImageView backButton;
     private TextView chatUsername;
+    private TextView StatusUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,8 @@ public class ChatActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
+        StatusUser = findViewById(R.id.status_user);
+
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
         messageEditText = findViewById(R.id.messageEditText);
         sendButton = findViewById(R.id.sendButton);
@@ -72,11 +77,45 @@ public class ChatActivity extends AppCompatActivity {
         // Load chat messages from Firestore
         loadChatMessages(receiverId);
 
+        fetchuserStatus();
+
         // Send message on button click
         sendButton.setOnClickListener(v -> sendMessage(receiverId));
 
         // Back button functionality
         backButton.setOnClickListener(v -> finish()); // Go back to the previous activity
+    }
+
+    private void fetchuserStatus(){
+        String uid = getIntent().getStringExtra("receiverId");
+        firestore.collection("users").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String status = documentSnapshot.getString("status");
+                        String fcmToken = documentSnapshot.getString("fcmToken");
+
+                        if (fcmToken == null || fcmToken.isEmpty()) {
+                            status = "Offline";
+                        }
+
+                        StatusUser.setText(status);
+
+                        if ("Online".equals(status)) {
+                            StatusUser.setBackgroundColor(Color.GREEN);
+                        } else if ("Offline".equals(status)) {
+                            StatusUser.setBackgroundColor(Color.GRAY);
+                        } else if ("Busy".equals(status)) {
+                            StatusUser.setBackgroundColor(Color.YELLOW);
+                        } else if ("Do Not Disturb".equals(status)) {
+                            StatusUser.setBackgroundColor(Color.RED);
+                        }
+                    } else {
+                        Toast.makeText(ChatActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(ChatActivity.this, "Error fetching user data", Toast.LENGTH_SHORT).show());
+
+
     }
 
     private void loadChatMessages(String receiverId) {
