@@ -14,16 +14,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pingmate.utils.FirebaseUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.pingmate.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.auth.User;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,13 +37,46 @@ public class homepage extends AppCompatActivity {
     private TextView Signout;
     private TextView usernameTextView;
     private Button fabNewchat;
-//    private UserAdapter.OnUserClickListener onUserCLickListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homepage_chat);
 
+        if (getIntent().getExtras() != null) {
+            // From notification
+            String userId = getIntent().getExtras().getString("userId");
+
+            if (userId != null && !userId.isEmpty()) {
+                // Fetch the user information and navigate to ChatActivity
+                db.collection("users").document(userId).get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                DocumentSnapshot documentSnapshot = task.getResult();
+                                Users user = documentSnapshot.toObject(Users.class);
+
+                                if (user != null) {
+                                    Intent intent = new Intent(homepage.this, ChatActivity.class);
+                                    intent.putExtra("clickedUsername", user.getUsername()); // Pass username
+                                    intent.putExtra("receiverId", userId); // Pass userId to ChatActivity
+                                    startActivity(intent);
+                                    finish(); // Close the homepage activity if needed
+                                } else {
+                                    Log.w("Notification", "User object is null");
+                                }
+                            } else {
+                                Log.w("Notification", "Failed to fetch user", task.getException());
+                            }
+                        });
+            } else {
+                Log.w("Notification", "userId is null or empty");
+            }
+        } else {
+            initializeHomePage();
+        }
+    }
+
+    private void initializeHomePage() {
         firebaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
@@ -55,26 +86,23 @@ public class homepage extends AppCompatActivity {
         userList = new ArrayList<>();
 
         userAdapter = new UserAdapter(userList, user -> {
-            // Handle the click event
             String clickedUsername = user.getUsername(); // Get the clicked user's username
             String receiverId = user.getId(); // Get the receiver's UID
 
-            // Validate receiverId before starting the ChatActivity
-            if (receiverId == null || receiverId.isEmpty()) {
+            if (receiverId != null && !receiverId.isEmpty()) {
+                Intent intent = new Intent(homepage.this, ChatActivity.class);
+                intent.putExtra("clickedUsername", clickedUsername); // Pass username
+                intent.putExtra("receiverId", receiverId); // Pass receiverId to ChatActivity
+                startActivity(intent);
+            } else {
                 Toast.makeText(homepage.this, "Receiver ID is missing for this user", Toast.LENGTH_SHORT).show();
-                return; // Stop here if receiverId is invalid
             }
-
-            Intent intent = new Intent(homepage.this, ChatActivity.class);
-            intent.putExtra("clickedUsername", clickedUsername); // Pass username
-            intent.putExtra("receiverId", receiverId); // Pass receiverId to ChatActivity
-            startActivity(intent);
         });
 
         userReclycerView.setAdapter(userAdapter);
 
         Signout = findViewById(R.id.Signout);
-        usernameTextView = findViewById(R.id.usernameTextView); // Reference to the username TextView
+        usernameTextView = findViewById(R.id.usernameTextView);
 
         FloatingActionButton fabNewchat = findViewById(R.id.fabNewChat);
         fabNewchat.setOnClickListener(view -> {
@@ -82,41 +110,41 @@ public class homepage extends AppCompatActivity {
             startActivity(intent);
         });
 
-
-        fetchUsername(); // Call this method to fetch and display username
-        fetchUsers(); // cal this method to fetch and display username\
+        fetchUsername();
+        fetchUsers();
         fetchGroupChats(db);
 
         Signout.setOnClickListener(v -> signOut());
+        getFCMToken();
+    }
+
+    private void getFCMToken() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String token = task.getResult();
+                FirebaseUtil.currentUserDetails().update("fcmToken", token);
+            }
+        });
     }
 
     private void fetchUsername() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         String uid = firebaseAuth.getCurrentUser().getUid();
-
-        // Fetch the user document from Firestore
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // Retrieve the username from Firestore and set it to the TextView
-                        String username = documentSnapshot.getString("username"); // Adjust the field name if necessary
-                        usernameTextView.setText(username); // Display the username in the TextView
+                        String username = documentSnapshot.getString("username");
+                        usernameTextView.setText(username);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.w("Firestore", "Error retrieving username", e);
-                });
+                .addOnFailureListener(e -> Log.w("Firestore", "Error retrieving username", e));
     }
 
-    private void fetchUsers(){
+    private void fetchUsers() {
         String currentUserId = firebaseAuth.getCurrentUser().getUid();
 
         db.collection("users").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Users> allUsers = new ArrayList<>();
-
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
                         Users user = document.toObject(Users.class);
 
@@ -124,13 +152,12 @@ public class homepage extends AppCompatActivity {
                             // Use Firestore's document ID as the user ID
                             user.setId(document.getId());
 
-                            // Exclude the current logged-in user
-                            if (!user.getId().equals(currentUserId)) {
+                            // Exclude the current logged-in user, with a null check
+                            if (user.getId() != null && !user.getId().equals(currentUserId)) {
                                 allUsers.add(user);
                             }
                         }
                     }
-
                     userList.clear();
                     userList.addAll(allUsers);
                     userAdapter.notifyDataSetChanged();
@@ -138,25 +165,27 @@ public class homepage extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e("Firestore", "Error fetching users", e));
     }
 
-    private void fetchGroupChats(FirebaseFirestore db){
+    private void fetchGroupChats(FirebaseFirestore db) {
         db.collection("groups")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<String> groupNames = new ArrayList<>();
-                    for(DocumentSnapshot snapshot : queryDocumentSnapshots){
+                    for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
                         String groupName = snapshot.getString("groupName");
                         groupNames.add(groupName);
                     }
+                    // Call a method to display the group chats
+                    displayGroupChats(groupNames);
                 })
-                .addOnFailureListener(e -> Log.w("Firestore", "error fetching groups"));
+                .addOnFailureListener(e -> Log.w("Firestore", "Error fetching groups", e));
     }
 
-    private void displayGroupChats(List<String> groupNames){
-        ListView groupListview = findViewById(R.id.userRecyclerView);
+    private void displayGroupChats(List<String> groupNames) {
+        ListView groupListview = findViewById(R.id.userRecyclerView); // Or another view for group chats
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, groupNames);
         groupListview.setAdapter(adapter);
 
-        groupListview.setOnItemClickListener((parent, view, position, id)->{
+        groupListview.setOnItemClickListener((parent, view, position, id) -> {
             String clickedGroup = groupNames.get(position);
             Intent intent = new Intent(homepage.this, GroupChatActivity.class);
             intent.putExtra("groupName", clickedGroup);
@@ -165,9 +194,6 @@ public class homepage extends AppCompatActivity {
     }
 
     private void signOut() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-
         String uid = firebaseAuth.getCurrentUser().getUid();
 
         // Remove the FCM token from Firestore
@@ -177,7 +203,7 @@ public class homepage extends AppCompatActivity {
 
         firebaseAuth.signOut();
 
-        // Optionally delete FCM token
+        // Delete FCM token
         FirebaseMessaging.getInstance().deleteToken()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -40,6 +41,15 @@ public class MainActivity extends AppCompatActivity{
         // initialize firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
+        if (mAuth.getCurrentUser() != null) {
+            // User is logged in, navigate to homepage
+            Intent intent = new Intent(MainActivity.this, homepage.class);
+            startActivity(intent);
+            finish(); // Optionally finish the MainActivity to prevent going back to login
+        } else {
+            // User is not logged in, stay on the login screen
+            Toast.makeText(this, "Please log in", Toast.LENGTH_SHORT).show();
+        }
         Username = findViewById(R.id.Username);
         Password = findViewById(R.id.Password);
         LoginBtn = findViewById(R.id.LoginBtn);
@@ -52,11 +62,13 @@ public class MainActivity extends AppCompatActivity{
             startActivity(new Intent(MainActivity.this, SignUpActivity.class));
         });
 
+
         ForgetPw.setOnClickListener(view -> {
             // handle forget password logic
             startActivity(new Intent(MainActivity.this, ResetPasswordActivity.class));
         });
     }
+
 
     private void loginUser(){
         String user = Username.getText().toString().trim();

@@ -8,6 +8,7 @@ public class chatMessage {
     private String username = "";
     private long timestamp = 0;
     private String receiverId;
+    private boolean isRead;
 
     public chatMessage(){
 
@@ -51,6 +52,5 @@ public class chatMessage {
     }
 
     public String getReceiverId() {return receiverId;}
-
 
 }

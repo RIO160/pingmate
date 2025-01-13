@@ -1,5 +1,10 @@
 package com.example.pingmate;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -79,6 +85,7 @@ public class ChatActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish()); // Go back to the previous activity
     }
 
+
     private void loadChatMessages(String receiverId) {
         String senderId = firebaseAuth.getCurrentUser().getUid();
 
@@ -146,5 +153,27 @@ public class ChatActivity extends AppCompatActivity {
                     Toast.makeText(ChatActivity.this, "Error sending message", Toast.LENGTH_SHORT).show();
                     Log.e("Firestore", "Error sending message", e);
                 });
+        firestore.collection("chats")
+                .document(chatId)
+                .collection("messages")
+                .orderBy("timestamp")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.e("Firestore", "Error loading messages", error);
+                        return;
+                    }
+
+                    if (value != null) {
+                        for (DocumentChange doc : value.getDocumentChanges()) {
+                            if (doc.getType() == DocumentChange.Type.ADDED) {
+                                chatMessage newMessage = doc.getDocument().toObject(chatMessage.class);
+
+                            }
+                        }
+                    }
+
+                });
+
     }
+
 }
