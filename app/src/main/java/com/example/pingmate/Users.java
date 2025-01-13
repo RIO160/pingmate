@@ -7,6 +7,7 @@ public class Users implements UserAdapter.ChatItem {
     private String userId;
     private String userId2;
     private String id;
+    private String fcmToken;
 
     public Users() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
@@ -61,5 +62,11 @@ public class Users implements UserAdapter.ChatItem {
         return chatId;
     }
 
+    public String getFcmToken() {
+        return fcmToken;
+    }
 
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 }
