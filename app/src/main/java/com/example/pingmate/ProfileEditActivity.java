@@ -1,6 +1,7 @@
 package com.example.pingmate;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -51,7 +52,8 @@ public class ProfileEditActivity extends Activity {
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
     private String selectedStatus;
-    private ImageView profileImageView;
+    private String profileImageUrl;
+    private ImageView profileImageView, addProfilePicture;
     private static final int PICK_IMAGE_REQUEST = 1;
 
 
@@ -67,6 +69,8 @@ public class ProfileEditActivity extends Activity {
         db = FirebaseFirestore.getInstance();
 
         profileImageView = findViewById(R.id.ivProfilePicture);
+        addProfilePicture = findViewById(R.id.ivAddProfilePicture);
+
 
         spinnerStatus = findViewById(R.id.spinnerStatus);
         TextView tvStatus = findViewById(R.id.tvStatus);
@@ -76,7 +80,10 @@ public class ProfileEditActivity extends Activity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statusOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
-        profileImageView.setOnClickListener(v -> openFileChooser());
+
+        profileImageView.setOnClickListener(v -> showFullImageDialog());
+
+        addProfilePicture.setOnClickListener(v -> openFileChooser());
 
         S3ClientManager.initialize(
                 this,
@@ -134,28 +141,32 @@ public class ProfileEditActivity extends Activity {
                     if (documentSnapshot.exists()) {
                         String username = documentSnapshot.getString("username");
                         String status = documentSnapshot.getString("status");
-                        String firstName = documentSnapshot.getString("first name");
-                        String lastName = documentSnapshot.getString("last name");
-                        String profileImageUrl = documentSnapshot.getString("profileImageUrl");
+                        profileImageUrl = documentSnapshot.getString("profileImageUrl");
 
+                        // Debugging logs
+                        Log.d("ProfileEditActivity", "Fetched Profile Image URL: " + profileImageUrl);
 
+                        // Load the data into the UI
                         editText.setText(username);
                         if (status != null) {
                             int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus.getAdapter()).getPosition(status);
                             spinnerStatus.setSelection(spinnerPosition);
                         }
-                        String userInfoText = "name: " + firstName + " " + lastName + "\nUsername: " + username + "\nstatus: " + status;
-                        userInfo.setText(userInfoText);
-                        // Load the profile image
                         if (profileImageUrl != null) {
                             Glide.with(this).load(profileImageUrl).into(profileImageView);
+
+                            // Add click listener for full image view
+                            profileImageView.setOnClickListener(v -> showFullImageDialog());
+                        } else {
+                            Log.e("ProfileEditActivity", "Profile Image URL is null.");
                         }
                     } else {
-                        Toast.makeText(ProfileEditActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+                        Log.e("ProfileEditActivity", "User document does not exist.");
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error fetching user data", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Log.e("ProfileEditActivity", "Error fetching user data: " + e.getMessage()));
     }
+
 
     private void updateProfile() {
         String uid = firebaseAuth.getCurrentUser().getUid();
@@ -252,9 +263,38 @@ public class ProfileEditActivity extends Activity {
         String uid = firebaseAuth.getCurrentUser().getUid();
         db.collection("users").document(uid)
                 .update("profileImageUrl", imageUrl)
-                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Profile image updated successfully", Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(aVoid -> {
+                    profileImageUrl = imageUrl; // Update the global variable
+                    Toast.makeText(ProfileEditActivity.this, "Profile image updated successfully", Toast.LENGTH_SHORT).show();
+                })
                 .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating profile image", Toast.LENGTH_SHORT).show());
     }
+    private void showFullImageDialog() {
+        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_full_image, null);
+            builder.setView(dialogView);
+
+            ImageView fullImageView = dialogView.findViewById(R.id.fullImageView);
+            Button closeButton = dialogView.findViewById(R.id.closeButton);
+
+            // Load the image using Glide
+            Glide.with(this)
+                    .load(profileImageUrl)
+                    .into(fullImageView);
+
+            AlertDialog dialog = builder.create();
+            closeButton.setOnClickListener(v -> dialog.dismiss());
+            dialog.show();
+        } else {
+            Toast.makeText(this, "No profile image found", Toast.LENGTH_SHORT).show();
+            Log.e("ProfileEditActivity", "Cannot show full image - profileImageUrl is null or empty.");
+        }
+    }
+
+
+
+
 }
 
 

@@ -62,7 +62,7 @@
                     android:focusable="true"
                     app:shapeAppearanceOverlay="@style/CircleImageView"/>
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivAddProfilePicture"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
@@ -107,7 +107,8 @@
                 android:layout_marginTop="16dp"
                 android:padding="10dp"
                 android:text="Status"
-                android:textColor="#FFFFFF"
+                android:textColor="#000000"
+                android:fontFamily="sans-serif-black"
                 android:gravity="center"
                 android:background="@drawable/roundsu_corner"/>
 
