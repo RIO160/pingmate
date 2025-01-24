@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.pingmate.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -98,24 +99,35 @@ public class homepage extends AppCompatActivity {
     }
 
     private void fetchUsername() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         String uid = firebaseAuth.getCurrentUser().getUid();
 
         // Fetch the user document from Firestore
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // Retrieve the username from Firestore and set it to the TextView
+                        // Retrieve the username from Firestore
                         String username = documentSnapshot.getString("username"); // Adjust the field name if necessary
-                        usernameTextView.setText(username); // Display the username in the TextView
+                        String profileImageUrl = documentSnapshot.getString("profileImageUrl"); // Retrieve profile image URL
+
+                        // Set username in the TextView
+                        usernameTextView.setText(username);
+
+                        // Load profile image using Glide
+                        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+                            // Use Glide to load the image from URL
+                            Glide.with(homepage.this)
+                                    .load(profileImageUrl)
+                                    .circleCrop()
+                                    .into((ImageView) findViewById(R.id.profile)); // Display in the ImageView
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.w("Firestore", "Error retrieving username", e);
                 });
     }
+
+
 
     private void fetchUsers(){
         String currentUserId = firebaseAuth.getCurrentUser().getUid();

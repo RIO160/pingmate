@@ -8,6 +8,7 @@ public class Users implements UserAdapter.ChatItem {
     private String userId2;
     private String id;
     private String fcmToken;
+    private String profileImageUrl;
 
     public Users() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
@@ -68,5 +69,13 @@ public class Users implements UserAdapter.ChatItem {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

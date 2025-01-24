@@ -16,7 +16,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="1dp"
-                android:background="@drawable/image_user2"
+                android:src="@drawable/image_user2"
                 android:contentDescription="App Logo"
                 android:scaleType="centerCrop"/>
 

@@ -22,6 +22,10 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.bumptech.glide.Glide;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +38,8 @@ import com.google.firebase.storage.StorageReference;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -71,6 +77,14 @@ public class ProfileEditActivity extends Activity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
         profileImageView.setOnClickListener(v -> openFileChooser());
+
+        S3ClientManager.initialize(
+                this,
+                "AKIAXTORPPDQTN2Z6XFC",
+                "kgKBIgXLwLZXfBE18mZTS614l9rgAx/l6WTnabtZ",
+                "ap-southeast-2"
+        );
+
 
         spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -172,47 +186,65 @@ public class ProfileEditActivity extends Activity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri imageUri = data.getData();
             profileImageView.setImageURI(imageUri);
-            uploadImageToFirebase(imageUri);
+            uploadImageToS3(imageUri);
         }
 
     }
 
-    private void uploadImageToFirebase(Uri imageUri) {
+    private void uploadImageToS3(Uri imageUri) {
         if (imageUri != null) {
-            // Get the current user's ID
-            String userId = firebaseAuth.getCurrentUser ().getUid();
+            try {
+                // Convert URI to File
+                String userId = firebaseAuth.getCurrentUser().getUid();
+                String fileName = "profile_images/" + userId + ".jpg";
+                File file = new File(getCacheDir(), "tempImage.jpg");
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                FileOutputStream out = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                out.close();
 
-            // Create a reference to the storage location
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-            Log.d("Firebase Storage", "Storage instance: " + FirebaseStorage.getInstance().toString());
-            StorageReference fileReference = storageRef.child("profile_images/" + userId + ".jpg");
+                // Upload to S3
+                TransferUtility transferUtility = S3ClientManager.getTransferUtility();
+                TransferObserver uploadObserver = transferUtility.upload(
+                        "nu-pingmate",
+                        fileName,
+                        file
+                );
 
-
-            // Log the upload path for debugging
-            Log.d("Upload Path", "Uploading to: " + fileReference.getPath());
-
-            // Start the upload
-            fileReference.putFile(imageUri)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        Log.d("Upload", "Upload successful");
-                        fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                            String imageUrl = uri.toString();
+                // Add listeners for upload progress
+                uploadObserver.setTransferListener(new TransferListener() {
+                    @Override
+                    public void onStateChanged(int id, TransferState state) {
+                        if (state == TransferState.COMPLETED) {
+                            Toast.makeText(ProfileEditActivity.this, "Upload successful", Toast.LENGTH_SHORT).show();
+                            String imageUrl = "https://nu-pingmate.s3.amazonaws.com/" + fileName;
                             updateProfileImageUrl(imageUrl);
-                        });
-                    })
-                    .addOnFailureListener(e -> {
-                        if (e instanceof StorageException) {
-                            StorageException se = (StorageException) e;
-                            Log.e("Storage Error", "Error Code: " + se.getErrorCode());
+                        } else if (state == TransferState.FAILED) {
+                            Toast.makeText(ProfileEditActivity.this, "Upload failed", Toast.LENGTH_SHORT).show();
                         }
-                        Log.e("Upload Error", "Upload failed: " + e.getMessage());
-                        Toast.makeText(ProfileEditActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                    }
 
+                    @Override
+                    public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                        double progress = (double) bytesCurrent / bytesTotal * 100;
+                        Log.d("S3 Upload", "Progress: " + progress + "%");
+                    }
+
+                    @Override
+                    public void onError(int id, Exception ex) {
+                        Log.e("S3 Upload", "Error: " + ex.getMessage());
+                    }
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(ProfileEditActivity.this, "No image selected", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
 
