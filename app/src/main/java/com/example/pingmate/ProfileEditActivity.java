@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +22,8 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -43,13 +46,16 @@ public class ProfileEditActivity extends Activity {
     private FirebaseFirestore db;
     private String selectedStatus;
     private ImageView profileImageView;
-
+    private static final int PICK_IMAGE_REQUEST = 1;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_edit);
+
+
+        FirebaseApp.initializeApp(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -64,6 +70,7 @@ public class ProfileEditActivity extends Activity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statusOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
+        profileImageView.setOnClickListener(v -> openFileChooser());
 
         spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -102,30 +109,33 @@ public class ProfileEditActivity extends Activity {
         Updatebutton.setOnClickListener(view -> updateProfile());
 
 
-
         fetchUserdata();
     }
 
 
-    private void fetchUserdata(){
+    private void fetchUserdata() {
         String uid = firebaseAuth.getCurrentUser().getUid();
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()){
+                    if (documentSnapshot.exists()) {
                         String username = documentSnapshot.getString("username");
                         String status = documentSnapshot.getString("status");
                         String firstName = documentSnapshot.getString("first name");
                         String lastName = documentSnapshot.getString("last name");
-
+                        String profileImageUrl = documentSnapshot.getString("profileImageUrl");
 
 
                         editText.setText(username);
-                        if (status !=  null){
-                            int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus. getAdapter()).getPosition(status);
+                        if (status != null) {
+                            int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus.getAdapter()).getPosition(status);
                             spinnerStatus.setSelection(spinnerPosition);
                         }
-                        String userInfoText = "name: " + firstName + "" + lastName + "\nUsername: " + username + "\nstatus: " + status;
+                        String userInfoText = "name: " + firstName + " " + lastName + "\nUsername: " + username + "\nstatus: " + status;
                         userInfo.setText(userInfoText);
+                        // Load the profile image
+                        if (profileImageUrl != null) {
+                            Glide.with(this).load(profileImageUrl).into(profileImageView);
+                        }
                     } else {
                         Toast.makeText(ProfileEditActivity.this, "User not found", Toast.LENGTH_SHORT).show();
                     }
@@ -137,7 +147,7 @@ public class ProfileEditActivity extends Activity {
         String uid = firebaseAuth.getCurrentUser().getUid();
         String newUsername = editText.getText().toString().trim();
 
-        if (newUsername.isEmpty()){
+        if (newUsername.isEmpty()) {
             editText.setError("Username is Required");
             editText.requestFocus();
             return;
@@ -149,4 +159,72 @@ public class ProfileEditActivity extends Activity {
                 .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating status", Toast.LENGTH_SHORT).show());
     }
 
+    private void openFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
+            profileImageView.setImageURI(imageUri);
+            uploadImageToFirebase(imageUri);
+        }
+
+    }
+
+    private void uploadImageToFirebase(Uri imageUri) {
+        if (imageUri != null) {
+            // Get the current user's ID
+            String userId = firebaseAuth.getCurrentUser ().getUid();
+
+            // Create a reference to the storage location
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            Log.d("Firebase Storage", "Storage instance: " + FirebaseStorage.getInstance().toString());
+            StorageReference fileReference = storageRef.child("profile_images/" + userId + ".jpg");
+
+
+            // Log the upload path for debugging
+            Log.d("Upload Path", "Uploading to: " + fileReference.getPath());
+
+            // Start the upload
+            fileReference.putFile(imageUri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        Log.d("Upload", "Upload successful");
+                        fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                            String imageUrl = uri.toString();
+                            updateProfileImageUrl(imageUrl);
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        if (e instanceof StorageException) {
+                            StorageException se = (StorageException) e;
+                            Log.e("Storage Error", "Error Code: " + se.getErrorCode());
+                        }
+                        Log.e("Upload Error", "Upload failed: " + e.getMessage());
+                        Toast.makeText(ProfileEditActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+
+        } else {
+            Toast.makeText(ProfileEditActivity.this, "No image selected", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    private void updateProfileImageUrl(String imageUrl) {
+        String uid = firebaseAuth.getCurrentUser().getUid();
+        db.collection("users").document(uid)
+                .update("profileImageUrl", imageUrl)
+                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Profile image updated successfully", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating profile image", Toast.LENGTH_SHORT).show());
+    }
 }
+
+
+
+
