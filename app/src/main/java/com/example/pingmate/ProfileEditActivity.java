@@ -301,39 +301,52 @@ public class ProfileEditActivity extends Activity {
 
         EditText etCurrentPassword = dialogView.findViewById(R.id.etCurrentPassword);
         EditText etNewPassword = dialogView.findViewById(R.id.etNewPassword);
+        EditText etConfirmPassword = dialogView.findViewById(R.id.etConfirmPassword);
         Button btnSubmitChange = dialogView.findViewById(R.id.btnSubmitChange);
+
 
         AlertDialog dialog = builder.create();
 
         btnSubmitChange.setOnClickListener(v -> {
             String currentPassword = etCurrentPassword.getText().toString().trim();
             String newPassword = etNewPassword.getText().toString().trim();
+            String confirmPassword = etConfirmPassword.getText().toString().trim();
 
             if (currentPassword.isEmpty() || newPassword.isEmpty()) {
                 Toast.makeText(ProfileEditActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
                 return;
+
+            }
+            if (confirmPassword.isEmpty()) {
+                Toast.makeText(ProfileEditActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                return;
+
             }
 
-            changePassword(currentPassword, newPassword, dialog);
+            changePassword(currentPassword, newPassword, confirmPassword, dialog);
         });
 
         dialog.show();
     }
 
     // Handle Password Change Logic
-    private void changePassword(String currentPassword, String newPassword, AlertDialog dialog) {
+    private void changePassword(String currentPassword, String newPassword, String confirmPassword, AlertDialog dialog) {
         String email = firebaseAuth.getCurrentUser().getEmail();
 
         // Reauthenticate the user with their current password
         firebaseAuth.signInWithEmailAndPassword(email, currentPassword)
                 .addOnSuccessListener(authResult -> {
                     // If reauthentication is successful, update the password
-                    firebaseAuth.getCurrentUser().updatePassword(newPassword)
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(ProfileEditActivity.this, "Password changed successfully", Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                            })
-                            .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Failed to update password: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    if (newPassword.equals(confirmPassword)) {
+                        firebaseAuth.getCurrentUser().updatePassword(newPassword)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(ProfileEditActivity.this, "Password changed successfully", Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                })
+                                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Failed to update password: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    }else{
+                        Toast.makeText(ProfileEditActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Current password is incorrect", Toast.LENGTH_SHORT).show());
     }

@@ -61,6 +61,8 @@ dependencies {
     implementation ("com.amazonaws:aws-android-sdk-s3:2.66.0")
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
+
 
 
     // For FCM

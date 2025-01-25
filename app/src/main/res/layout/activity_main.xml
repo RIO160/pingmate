@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="@drawable/gradient_color">
+    android:background="@drawable/gradient_color"
+    tools:context=".MainActivity">
 
+    <!-- App Logo -->
     <ImageView
         android:id="@+id/Logo"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:src="@drawable/ping_mate"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
         android:background="@drawable/cricle"
         android:contentDescription="App Logo"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="50dp"/>
 
-    <!-- Login -->
-
+    <!-- Login Title -->
     <TextView
         android:id="@+id/LoginTitle"
         android:layout_width="wrap_content"
@@ -26,80 +31,88 @@
         android:text="Login"
         android:textSize="24sp"
         android:textColor="#FFFFFF"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="32dp"
-        android:layout_marginTop="250dp"/>
+        app:layout_constraintTop_toBottomOf="@id/Logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="50dp"/>
 
-
-    <!-- Username Text Tile -->
+    <!-- Email Input -->
     <EditText
         android:id="@+id/Username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email Address"
         android:padding="12dp"
-        android:layout_below="@+id/LoginTitle"
-        android:layout_marginTop="16dp"
         android:background="@drawable/round_corners"
         android:drawableStart="@drawable/image_user"
         android:drawablePadding="8dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#80ffffff"
-        android:inputType="text"/>
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/LoginTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
-    <!-- Password Text Tile -->
+    <!-- Password Input -->
     <EditText
         android:id="@+id/Password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
         android:padding="12dp"
-        android:layout_below="@+id/Username"
-        android:layout_marginTop="16dp"
         android:background="@drawable/round_corners"
         android:drawableStart="@drawable/image_padlock"
         android:drawablePadding="8dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#80ffffff"
-        android:inputType="textPassword"/>
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/Username"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
+    <!-- Login Button -->
     <Button
         android:id="@+id/LoginBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/Password"
-        android:layout_marginTop="29dp"
-        android:padding="12dp"
         android:text="Login"
+        android:textColor="#ffff"
         android:backgroundTint="#004481"
-        android:textColor="#ffff"/>
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/Password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="29dp"/>
 
+    <!-- Forgot Password -->
     <TextView
         android:id="@+id/ForgetPw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#ffff"
-        android:layout_below="@+id/LoginBtn"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
         android:text="@string/forget_password"
         android:textSize="14sp"
-        android:clickable="true"
+        android:textColor="#ffff"
         android:textStyle="normal"
+        android:clickable="true"
         android:autoLink="none"
-        android:layout_marginEnd="10dp"/>
+        app:layout_constraintTop_toBottomOf="@id/LoginBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
+    <!-- Sign Up Button -->
     <Button
         android:id="@+id/SignupBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Sign Up"
         android:textColor="#ffff"
-        android:layout_below="@+id/ForgetPw"
-        android:layout_centerHorizontal="true"
         android:backgroundTint="#004481"
-        android:layout_marginTop="40dp"
-         />
+        app:layout_constraintTop_toBottomOf="@id/ForgetPw"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"/>
 
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
