@@ -81,6 +81,8 @@ public class ProfileEditActivity extends Activity {
         spinnerStatus.setAdapter(adapter);
         Button Updatebutton = findViewById(R.id.updateBtn);
         Updatebutton.setOnClickListener(v -> updateProfile());
+        Button btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnChangePassword.setOnClickListener(v -> showPasswordChangeDialog());
         profileImageView.setOnClickListener(v -> showFullImageDialog());
 
         addProfilePicture.setOnClickListener(v -> openFileChooser());
@@ -290,6 +292,50 @@ public class ProfileEditActivity extends Activity {
             Toast.makeText(this, "No profile image found", Toast.LENGTH_SHORT).show();
             Log.e("ProfileEditActivity", "Cannot show full image - profileImageUrl is null or empty.");
         }
+    }
+    // Show the Password Change Dialog
+    private void showPasswordChangeDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_change_password, null);
+        builder.setView(dialogView);
+
+        EditText etCurrentPassword = dialogView.findViewById(R.id.etCurrentPassword);
+        EditText etNewPassword = dialogView.findViewById(R.id.etNewPassword);
+        Button btnSubmitChange = dialogView.findViewById(R.id.btnSubmitChange);
+
+        AlertDialog dialog = builder.create();
+
+        btnSubmitChange.setOnClickListener(v -> {
+            String currentPassword = etCurrentPassword.getText().toString().trim();
+            String newPassword = etNewPassword.getText().toString().trim();
+
+            if (currentPassword.isEmpty() || newPassword.isEmpty()) {
+                Toast.makeText(ProfileEditActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            changePassword(currentPassword, newPassword, dialog);
+        });
+
+        dialog.show();
+    }
+
+    // Handle Password Change Logic
+    private void changePassword(String currentPassword, String newPassword, AlertDialog dialog) {
+        String email = firebaseAuth.getCurrentUser().getEmail();
+
+        // Reauthenticate the user with their current password
+        firebaseAuth.signInWithEmailAndPassword(email, currentPassword)
+                .addOnSuccessListener(authResult -> {
+                    // If reauthentication is successful, update the password
+                    firebaseAuth.getCurrentUser().updatePassword(newPassword)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(ProfileEditActivity.this, "Password changed successfully", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Failed to update password: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                })
+                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Current password is incorrect", Toast.LENGTH_SHORT).show());
     }
 
 

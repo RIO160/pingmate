@@ -123,6 +123,17 @@
                 android:backgroundTint="#005F83"
                 android:textSize="18sp"
                 android:textColor="#FFFFFF"/>
+            <Button
+                android:id="@+id/btnChangePassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Change Password"
+                android:layout_marginTop="16dp"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/updateBtn"
+                android:backgroundTint="#005F83"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
 
 
         </LinearLayout>
