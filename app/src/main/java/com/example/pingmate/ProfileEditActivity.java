@@ -48,7 +48,6 @@ public class ProfileEditActivity extends Activity {
     private Button Backbutton, Updatebutton;
     private EditText editText;
     private Spinner spinnerStatus;
-    private TextView userInfo;
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
     private String selectedStatus;
@@ -75,12 +74,13 @@ public class ProfileEditActivity extends Activity {
         spinnerStatus = findViewById(R.id.spinnerStatus);
         TextView tvStatus = findViewById(R.id.tvStatus);
         editText = findViewById(R.id.pfp_Edit_username);
-        userInfo = findViewById(R.id.userInfo);
+
         String[] statusOptions = {"Online", "Offline", "Busy", "Do Not Disturb"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statusOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
-
+        Button Updatebutton = findViewById(R.id.updateBtn);
+        Updatebutton.setOnClickListener(v -> updateProfile());
         profileImageView.setOnClickListener(v -> showFullImageDialog());
 
         addProfilePicture.setOnClickListener(v -> openFileChooser());
