@@ -9,6 +9,8 @@ public class chatMessage {
     private long timestamp = 0;
     private String receiverId;
     private boolean isRead;
+    private String senderProfileImageUrl;
+    private String receiverProfileImageUrl;
 
     public chatMessage(){
 
@@ -23,6 +25,9 @@ public class chatMessage {
     }
 
     // Getters and setters for each field
+    public String getSenderProfileImageUrl() {
+        return senderProfileImageUrl != null ? senderProfileImageUrl : "";
+    }
     public String getMessage() {
         return message;
     }
@@ -53,4 +58,7 @@ public class chatMessage {
 
     public String getReceiverId() {return receiverId;}
 
+    public String getReceiverProfileImageUrl() {
+        return receiverProfileImageUrl;
+    }
 }

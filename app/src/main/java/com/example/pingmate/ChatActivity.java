@@ -1,6 +1,9 @@
 package com.example.pingmate;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,16 +13,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.util.ArrayList;
@@ -34,18 +35,21 @@ public class ChatActivity extends AppCompatActivity {
     private List<chatMessage> chatMessageList;
     private EditText messageEditText;
     private ImageButton sendButton;
-    private ImageView backButton;
+    private ImageView backButton, profileImageView;
     private TextView chatUsername;
     private TextView StatusUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        profileImageView = findViewById(R.id.profileImageView);
 
         // Get the username and receiverId passed from the previous activity
         String username = getIntent().getStringExtra("clickedUsername");
         String receiverId = getIntent().getStringExtra("receiverId");
+        loadReceiverProfileImage(receiverId);
 
         // Ensure receiverId is not null
         if (receiverId == null || receiverId.isEmpty()) {
@@ -61,23 +65,25 @@ public class ChatActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
-        StatusUser = findViewById(R.id.status_user);
+
 
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
         messageEditText = findViewById(R.id.messageEditText);
         sendButton = findViewById(R.id.sendButton);
         backButton = findViewById(R.id.backButton);
 
+
         // Initialize the chat messages list and adapter
         chatMessageList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(chatMessageList, firebaseAuth.getCurrentUser().getUid());
+        chatAdapter = new ChatAdapter(chatMessageList, firebaseAuth.getCurrentUser().getUid(), receiverId, this);
+        chatRecyclerView.setAdapter(chatAdapter);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         chatRecyclerView.setAdapter(chatAdapter);
 
         // Load chat messages from Firestore
         loadChatMessages(receiverId);
 
-        fetchuserStatus();
+        fetchUserStatus();
 
         // Send message on button click
         sendButton.setOnClickListener(v -> sendMessage(receiverId));
@@ -86,7 +92,7 @@ public class ChatActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish()); // Go back to the previous activity
     }
 
-    private void fetchuserStatus(){
+    private void fetchUserStatus() {
         String uid = getIntent().getStringExtra("receiverId");
         firestore.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -98,25 +104,62 @@ public class ChatActivity extends AppCompatActivity {
                             status = "Offline";
                         }
 
-                        StatusUser.setText(status);
+                        ImageView statusCircle = findViewById(R.id.statusCircle);
+
+                        // Get the current status color
+                        int statusColor = Color.GRAY; // Default to gray (Offline)
 
                         if ("Online".equals(status)) {
-                            StatusUser.setBackgroundColor(Color.GREEN);
+                            statusColor = Color.GREEN;
                         } else if ("Offline".equals(status)) {
-                            StatusUser.setBackgroundColor(Color.GRAY);
+                            statusColor = Color.GRAY;
                         } else if ("Busy".equals(status)) {
-                            StatusUser.setBackgroundColor(Color.YELLOW);
+                            statusColor = Color.YELLOW;
                         } else if ("Do Not Disturb".equals(status)) {
-                            StatusUser.setBackgroundColor(Color.RED);
+                            statusColor = Color.RED;
                         }
+
+                        // Set the status color to the statusCircle drawable
+                        Drawable statusDrawable = getResources().getDrawable(R.drawable.status_circle, null);
+                        if (statusDrawable != null) {
+                            if (statusDrawable instanceof GradientDrawable) {
+                                // Set the new color to the circle drawable
+                                ((GradientDrawable) statusDrawable).setColor(statusColor);
+                            }
+                        }
+                        statusCircle.setImageDrawable(statusDrawable);
+
                     } else {
                         Toast.makeText(ChatActivity.this, "User not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(ChatActivity.this, "Error fetching user data", Toast.LENGTH_SHORT).show());
-
-
     }
+
+
+    private void loadReceiverProfileImage(String receiverId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance(); // Ensure Firestore is initialized
+        if (db == null) {
+            Log.e("ChatActivity", "Firestore is NULL!");
+            return;
+        }
+
+        db.collection("users").document(receiverId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String receiverProfileImageUrl = documentSnapshot.getString("profileImageUrl");
+                        if (receiverProfileImageUrl != null && !receiverProfileImageUrl.isEmpty()) {
+                            Glide.with(this).load(receiverProfileImageUrl)
+                                    .placeholder(R.drawable.image_user2)
+                                    .circleCrop()
+                                    .into(profileImageView);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("ChatActivity", "Failed to load profile image", e));
+    }
+
 
     private void loadChatMessages(String receiverId) {
         String senderId = firebaseAuth.getCurrentUser().getUid();

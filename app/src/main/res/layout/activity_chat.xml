@@ -4,68 +4,77 @@
     android:layout_height="match_parent"
     android:background="@drawable/gradient_color">
 
+    <!-- Toolbar Layout -->
     <RelativeLayout
         android:id="@+id/chat_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffffff"
-        android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="20dp">
 
+        <!-- Back Button -->
         <ImageView
             android:id="@+id/backButton"
-            android:layout_width="23dp"
-            android:layout_height="23dp"
-            android:layout_marginEnd="15dp"
+            android:layout_width="45dp"
+            android:layout_height="50dp"
             android:background="@drawable/cricle"
             android:backgroundTint="#74C0DA"
             android:clickable="true"
-            android:contentDescription="Back"
             android:focusable="true"
-            android:src="@drawable/image_left" />
+            android:src="@drawable/image_left"
+            android:contentDescription="Back" />
 
+        <!-- Profile Picture (Moved after Back Button) -->
+        <ImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@id/backButton"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/image_user2"
+            android:contentDescription="Profile Picture"
+            android:scaleType="centerCrop"
+            android:background="@drawable/cricle"/>
+
+        <!-- Username (Next to Profile Picture) -->
+
+        <!-- Status (Next to Username) -->
         <TextView
             android:id="@+id/chatUsername"
-            android:layout_width="82dp"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/backButton"
-            android:visibility="visible"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/status_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/chatUsername"
-            android:layout_marginStart="8dp"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:text="Online" />
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="7dp"
+            android:layout_toRightOf="@id/profileImageView"
+            android:text="Username"
+            android:textColor="#000000"
+            android:textSize="25sp"
+            android:textStyle="bold" />
 
-<!--        <ImageView-->
-<!--            android:id="@+id/profileImageView"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_marginEnd="8dp"-->
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:src="@drawable/default_profile_picture"-->
-<!--            android:contentDescription="Profile Picture" />-->
+        <ImageView
+            android:id="@+id/statusCircle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/chatUsername"
+            android:layout_marginTop="4dp"
+            android:contentDescription="User Status"
+            android:src="@drawable/status_circle" />
 
     </RelativeLayout>
 
-    <!-- RecyclerView for showing chat messages -->
+    <!-- RecyclerView for chat messages -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@+id/chat_toolbar"
+        android:layout_below="@id/chat_toolbar"
         android:layout_above="@id/messageLayout"
         android:scrollbars="vertical"
         android:padding="8dp" />
 
-    <!-- Layout for typing messages -->
+    <!-- Message Input Layout -->
     <LinearLayout
         android:id="@+id/messageLayout"
         android:layout_width="match_parent"
