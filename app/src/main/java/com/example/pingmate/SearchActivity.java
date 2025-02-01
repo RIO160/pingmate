@@ -64,60 +64,107 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void searchForMatch() {
-        searchProgress.setVisibility(View.VISIBLE); // Show animation
+        searchProgress.setVisibility(View.VISIBLE);
         matchResult.setVisibility(View.GONE);
 
-        // Get the preferred gender
         String preferredGender = getSelectedGender();
 
         Query query = db.collection("users")
-                        .whereEqualTo("gender", preferredGender)
-                        .whereEqualTo("status", "Online")
-                        .whereEqualTo("searching", true)
-                        .whereNotEqualTo("id", currentUserId);
+                .whereEqualTo("gender", preferredGender)
+                .whereEqualTo("status", "Online")
+                .whereEqualTo("searching", true);
 
-        // Fetch users from Firebase based on gender preference
-//        db.collection("users")
-//                .whereEqualTo("gender", preferredGender)
-//                .whereEqualTo("status", "Online")
-//                .whereEqualTo("searching", true)
-//                .whereNotEqualTo("id", currentUserId)
+        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            searchProgress.setVisibility(View.GONE);
+            List<DocumentSnapshot> matchedUsers = queryDocumentSnapshots.getDocuments();
 
-                query.get().addOnSuccessListener(queryDocumentSnapshots -> {
-                    searchProgress.setVisibility(View.GONE);
+            // Remove current user manually
+            matchedUsers.removeIf(user -> user.getId().equals(currentUserId));
 
-                    List<DocumentSnapshot> matchedUsers = queryDocumentSnapshots.getDocuments();
-                    if (!matchedUsers.isEmpty()) {
-                        int randomIndex = new Random().nextInt(matchedUsers.size());
-                        DocumentSnapshot match = matchedUsers.get(randomIndex);
-                        String matchedUser = match.getString("username");
-                        String receiverId = match.getId();
+            if (!matchedUsers.isEmpty()) {
+                int randomIndex = new Random().nextInt(matchedUsers.size());
+                DocumentSnapshot match = matchedUsers.get(randomIndex);
+                String matchedUser = match.getString("username");
+                String receiverId = match.getId();
 
-                        // Save the match message to Firestore
-                        //String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                        db.collection("users").document(currentUserId)
-                                .update("matchMessage", "You got matched with " + matchedUser)
-                                .addOnSuccessListener(aVoid -> {
-                                    // Start ChatActivity with matched user information
-                                    Intent intent = new Intent(SearchActivity.this, ChatActivity.class);
-                                    intent.putExtra("matchedUser", matchedUser);
-                                    intent.putExtra("receiverId", receiverId);
-                                    startActivity(intent);
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(SearchActivity.this, "Error saving match message", Toast.LENGTH_SHORT).show());
+                db.collection("users").document(currentUserId)
+                        .update("matchMessage", "You got matched with " + matchedUser)
+                        .addOnSuccessListener(aVoid -> {
+                            Intent intent = new Intent(SearchActivity.this, ChatActivity.class);
+                            intent.putExtra("matchedUser", matchedUser);
+                            intent.putExtra("receiverId", receiverId);
+                            startActivity(intent);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(SearchActivity.this, "Error saving match message", Toast.LENGTH_SHORT).show());
 
-                        matchResult.setText("Matched with: " + matchedUser);
-                        matchResult.setVisibility(View.VISIBLE);
-                    } else {
-                        matchResult.setText("No matches found.");
-                        matchResult.setVisibility(View.VISIBLE);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    searchProgress.setVisibility(View.GONE);
-                    Toast.makeText(SearchActivity.this, "Error finding match", Toast.LENGTH_SHORT).show();
-                });
+                matchResult.setText("Matched with: " + matchedUser);
+                matchResult.setVisibility(View.VISIBLE);
+            } else {
+                matchResult.setText("No matches found.");
+                matchResult.setVisibility(View.VISIBLE);
+            }
+        }).addOnFailureListener(e -> {
+            searchProgress.setVisibility(View.GONE);
+            Toast.makeText(SearchActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
+
+
+//    private void searchForMatch() {
+//        searchProgress.setVisibility(View.VISIBLE); // Show animation
+//        matchResult.setVisibility(View.GONE);
+//
+//        // Get the preferred gender
+//        String preferredGender = getSelectedGender();
+//
+//        Query query = db.collection("users")
+//                        .whereEqualTo("gender", preferredGender)
+//                        .whereEqualTo("status", "Online")
+//                        .whereEqualTo("searching", true)
+//                        .whereNotEqualTo("id", currentUserId);
+//
+//        // Fetch users from Firebase based on gender preference
+////        db.collection("users")
+////                .whereEqualTo("gender", preferredGender)
+////                .whereEqualTo("status", "Online")
+////                .whereEqualTo("searching", true)
+////                .whereNotEqualTo("id", currentUserId)
+//
+//                query.get().addOnSuccessListener(queryDocumentSnapshots -> {
+//                    searchProgress.setVisibility(View.GONE);
+//
+//                    List<DocumentSnapshot> matchedUsers = queryDocumentSnapshots.getDocuments();
+//                    if (!matchedUsers.isEmpty()) {
+//                        int randomIndex = new Random().nextInt(matchedUsers.size());
+//                        DocumentSnapshot match = matchedUsers.get(randomIndex);
+//                        String matchedUser = match.getString("username");
+//                        String receiverId = match.getId();
+//
+//                        // Save the match message to Firestore
+//                        //String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+//                        db.collection("users").document(currentUserId)
+//                                .update("matchMessage", "You got matched with " + matchedUser)
+//                                .addOnSuccessListener(aVoid -> {
+//                                    // Start ChatActivity with matched user information
+//                                    Intent intent = new Intent(SearchActivity.this, ChatActivity.class);
+//                                    intent.putExtra("matchedUser", matchedUser);
+//                                    intent.putExtra("receiverId", receiverId);
+//                                    startActivity(intent);
+//                                })
+//                                .addOnFailureListener(e -> Toast.makeText(SearchActivity.this, "Error saving match message", Toast.LENGTH_SHORT).show());
+//
+//                        matchResult.setText("Matched with: " + matchedUser);
+//                        matchResult.setVisibility(View.VISIBLE);
+//                    } else {
+//                        matchResult.setText("No matches found.");
+//                        matchResult.setVisibility(View.VISIBLE);
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    searchProgress.setVisibility(View.GONE);
+//                    Toast.makeText(SearchActivity.this, "Error finding match", Toast.LENGTH_SHORT).show();
+//                });
+//    }
 
     private String getSelectedGender() {
         int selectedId = genderRadioGroup.getCheckedRadioButtonId();
@@ -134,6 +181,9 @@ public class SearchActivity extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
         // set searching to false when leaving the activity
-        db.collection("users").document(currentUserId).update("searching", false);
+        if (currentUserId != null){
+            db.collection("users").document(currentUserId).update("searching", false);
+        }
+
     }
 }
