@@ -2,6 +2,7 @@ package com.example.pingmate;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -102,6 +103,10 @@ public class SearchActivity extends AppCompatActivity {
             } else {
                 matchResult.setText("No matches found.");
                 matchResult.setVisibility(View.VISIBLE);
+
+                db.collection("users").document(currentUserId).update("searching", false)
+                .addOnSuccessListener(aVoid -> Log.d("SearchActivity", "User is no longer searching"))
+                .addOnFailureListener(e -> Log.e("SearchActivity", "Error updating user status"));
             }
         }).addOnFailureListener(e -> {
             searchProgress.setVisibility(View.GONE);
@@ -186,4 +191,13 @@ public class SearchActivity extends AppCompatActivity {
         }
 
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (currentUserId != null) {
+            db.collection("users").document(currentUserId).update("searching", false);
+        }
+    }
+
 }
