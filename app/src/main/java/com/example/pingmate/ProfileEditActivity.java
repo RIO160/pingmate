@@ -46,7 +46,7 @@ import java.util.ArrayList;
 
 public class ProfileEditActivity extends Activity {
     private Button Backbutton, Updatebutton;
-    private EditText editText;
+    private EditText editText, pfp_Edit_Gender;
     private Spinner spinnerStatus;
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
@@ -61,6 +61,7 @@ public class ProfileEditActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_edit);
 
+        pfp_Edit_Gender = findViewById(R.id.pfp_Edit_Gender);
 
         FirebaseApp.initializeApp(this);
 
@@ -173,6 +174,7 @@ public class ProfileEditActivity extends Activity {
     private void updateProfile() {
         String uid = firebaseAuth.getCurrentUser().getUid();
         String newUsername = editText.getText().toString().trim();
+        String newGender = pfp_Edit_Gender.getText().toString().trim();
 
         if (newUsername.isEmpty()) {
             editText.setError("Username is Required");
@@ -180,9 +182,15 @@ public class ProfileEditActivity extends Activity {
             return;
         }
 
+        if (newGender.isEmpty()) {
+            editText.setError("Gender is Required");
+            editText.requestFocus();
+            return;
+        }
+
         db.collection("users").document(uid)
-                .update("status", selectedStatus, "username", newUsername)
-                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Status updated successfully", Toast.LENGTH_SHORT).show())
+                .update("status", selectedStatus, "username", newUsername, "gender", newGender)
+                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating status", Toast.LENGTH_SHORT).show());
     }
 

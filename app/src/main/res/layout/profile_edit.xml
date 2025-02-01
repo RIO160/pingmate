@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:background="@drawable/gradient2_color"
-    tools:context=".ProfileActivity">
+    tools:context=".ProfileEditActivity">
 
     <!-- CardView Container -->
     <androidx.cardview.widget.CardView
@@ -98,6 +98,21 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="20dp"/>
 
+            <EditText
+                android:id="@+id/pfp_Edit_Gender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Gender"
+                android:inputType="text"
+                android:background="@drawable/roundsu_corner"
+                android:textColorHint="#80ffffff"
+                android:textSize="27sp"
+                android:paddingStart="15dp"
+                app:layout_constraintTop_toBottomOf="@id/pfp_Edit_username"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="12dp"/>
+
             <!-- Spinner (Dropdown) -->
             <Spinner
                 android:id="@+id/spinnerStatus"
@@ -105,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/roundsu_corner"
                 android:padding="8dp"
-                app:layout_constraintTop_toBottomOf="@id/pfp_Edit_username"
+                app:layout_constraintTop_toBottomOf="@id/pfp_Edit_Gender"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="12dp"/>

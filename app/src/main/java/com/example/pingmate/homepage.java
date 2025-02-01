@@ -17,20 +17,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.example.pingmate.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.auth.User;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class homepage extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
@@ -78,9 +72,10 @@ public class homepage extends AppCompatActivity {
         Signout = findViewById(R.id.Signout);
         usernameTextView = findViewById(R.id.usernameTextView); // Reference to the username TextView
 
+        //change to searching for a match button
         FloatingActionButton fabNewchat = findViewById(R.id.fabNewChat);
         fabNewchat.setOnClickListener(view -> {
-            Intent intent = new Intent(homepage.this, GroupCreationActivity.class);
+            Intent intent = new Intent(homepage.this, SearchActivity.class);
             startActivity(intent);
         });
 
@@ -142,6 +137,7 @@ public class homepage extends AppCompatActivity {
                         if (user != null) {
                             // Use Firestore's document ID as the user ID
                             user.setId(document.getId());
+                            user.setMatchedMessage(document.getString("matchedMessage"));
 
                             // Exclude the current logged-in user
                             if (!user.getId().equals(currentUserId)) {

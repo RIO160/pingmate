@@ -39,6 +39,7 @@
         <activity android:name=".ChatActivity" />
         <activity android:name=".GroupCreationActivity" />
         <activity android:name=".ProfileEditActivity"/>
+        <activity android:name=".SearchActivity"/>
 
         <service
             android:name=".messaging_service"

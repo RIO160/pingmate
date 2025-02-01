@@ -7,6 +7,7 @@ public class Users implements UserAdapter.ChatItem {
     private String userId;
     private String userId2;
     private String id;
+    private String matchedMessage;
     private String fcmToken;
     private String profileImageUrl;
 
@@ -14,31 +15,20 @@ public class Users implements UserAdapter.ChatItem {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public Users(String username, String email, String userId, String chatId, String id) {
+    public Users(String username, String email, String userId, String chatId, String id, String matchedMessage) {
         this.username = username;
         this.email = email;
         this.userId = userId;
         this.chatId = chatId;
-        this.userId2 = userId2;
         this.id = id;
-    }
-
-    public String getName() {
-        return getUsername();
-    }
-    public String getId(){
-        return id;
-    }
-
-    public void setId(String id){
-        this.id = id;
+        this.matchedMessage = matchedMessage;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username){
+    public void setUsername(String username) {
         this.username = username;
     }
 
@@ -46,21 +36,48 @@ public class Users implements UserAdapter.ChatItem {
         return email;
     }
 
-    public void setEmail(String email){
+    public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(String chatId) {
+        this.chatId = chatId;
     }
 
     public String getUserId() {
         return userId;
     }
 
-    public String getUserId2(){
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserId2() {
         return userId2;
     }
 
+    public void setUserId2(String userId2) {
+        this.userId2 = userId2;
+    }
 
-    public String getChatId() {
-        return chatId;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getMatchedMessage() {
+        return matchedMessage;
+    }
+
+    public void setMatchedMessage(String matchedMessage) {
+        this.matchedMessage = matchedMessage;
     }
 
     public String getFcmToken() {
