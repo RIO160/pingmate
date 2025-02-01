@@ -13,8 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
+import java.util.List;
 import java.util.Random;
 
 public class SearchActivity extends AppCompatActivity {
@@ -23,6 +26,7 @@ public class SearchActivity extends AppCompatActivity {
     private TextView matchResult;
     private RadioGroup genderRadioGroup;
     private FirebaseFirestore db;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +39,28 @@ public class SearchActivity extends AppCompatActivity {
         matchResult = findViewById(R.id.matchResult);
         genderRadioGroup = findViewById(R.id.genderRadioGroup);
         db = FirebaseFirestore.getInstance();
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         BackBtn.setOnClickListener(view -> {
             Intent intent = new Intent(SearchActivity.this, homepage.class);
             startActivity(intent);
         });
 
-        searchBtn.setOnClickListener(v -> searchForMatch());
+        searchBtn.setOnClickListener(v -> startSearching());
+    }
+
+    private void startSearching() {
+        searchProgress.setVisibility(View.VISIBLE);
+        matchResult.setVisibility(View.GONE);
+
+        // Set the current user to "searching" in Firestore
+        DocumentReference userRef = db.collection("users").document(currentUserId);
+        userRef.update("searching", true)
+                .addOnSuccessListener(aVoid -> searchForMatch())
+                .addOnFailureListener(e -> {
+                    searchProgress.setVisibility(View.GONE);
+                    Toast.makeText(SearchActivity.this, "Error updating search status", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void searchForMatch() {
@@ -51,23 +70,32 @@ public class SearchActivity extends AppCompatActivity {
         // Get the preferred gender
         String preferredGender = getSelectedGender();
 
+        Query query = db.collection("users")
+                        .whereEqualTo("gender", preferredGender)
+                        .whereEqualTo("status", "Online")
+                        .whereEqualTo("searching", true)
+                        .whereNotEqualTo("id", currentUserId);
+
         // Fetch users from Firebase based on gender preference
-        db.collection("users")
-                .whereEqualTo("gender", preferredGender)
-                .whereEqualTo("status", "Online")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+//        db.collection("users")
+//                .whereEqualTo("gender", preferredGender)
+//                .whereEqualTo("status", "Online")
+//                .whereEqualTo("searching", true)
+//                .whereNotEqualTo("id", currentUserId)
+
+                query.get().addOnSuccessListener(queryDocumentSnapshots -> {
                     searchProgress.setVisibility(View.GONE);
 
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        int randomIndex = new Random().nextInt(queryDocumentSnapshots.size());
-                        DocumentSnapshot match = queryDocumentSnapshots.getDocuments().get(randomIndex);
+                    List<DocumentSnapshot> matchedUsers = queryDocumentSnapshots.getDocuments();
+                    if (!matchedUsers.isEmpty()) {
+                        int randomIndex = new Random().nextInt(matchedUsers.size());
+                        DocumentSnapshot match = matchedUsers.get(randomIndex);
                         String matchedUser = match.getString("username");
                         String receiverId = match.getId();
 
                         // Save the match message to Firestore
-                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                        db.collection("users").document(uid)
+                        //String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        db.collection("users").document(currentUserId)
                                 .update("matchMessage", "You got matched with " + matchedUser)
                                 .addOnSuccessListener(aVoid -> {
                                     // Start ChatActivity with matched user information
@@ -100,5 +128,12 @@ public class SearchActivity extends AppCompatActivity {
         } else {
             return "Any"; // Fetch any gender
         }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        // set searching to false when leaving the activity
+        db.collection("users").document(currentUserId).update("searching", false);
     }
 }
