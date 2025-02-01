@@ -1,9 +1,11 @@
 package com.example.pingmate;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +23,12 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.bumptech.glide.Glide;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,19 +39,21 @@ import com.google.firebase.storage.StorageReference;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class ProfileEditActivity extends Activity {
     private Button Backbutton, Updatebutton;
-    private EditText editText;
+    private EditText editText, pfp_Edit_Gender;
     private Spinner spinnerStatus;
-    private TextView userInfo;
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
     private String selectedStatus;
-    private ImageView profileImageView;
-
+    private String profileImageUrl;
+    private ImageView profileImageView, addProfilePicture;
+    private static final int PICK_IMAGE_REQUEST = 1;
 
 
     @Override
@@ -51,19 +61,40 @@ public class ProfileEditActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_edit);
 
+        pfp_Edit_Gender = findViewById(R.id.pfp_Edit_Gender);
+
+        FirebaseApp.initializeApp(this);
+
         firebaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         profileImageView = findViewById(R.id.ivProfilePicture);
+        addProfilePicture = findViewById(R.id.ivAddProfilePicture);
+
 
         spinnerStatus = findViewById(R.id.spinnerStatus);
         TextView tvStatus = findViewById(R.id.tvStatus);
         editText = findViewById(R.id.pfp_Edit_username);
-        userInfo = findViewById(R.id.userInfo);
+
         String[] statusOptions = {"Online", "Offline", "Busy", "Do Not Disturb"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statusOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
+        Button Updatebutton = findViewById(R.id.updateBtn);
+        Updatebutton.setOnClickListener(v -> updateProfile());
+        Button btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnChangePassword.setOnClickListener(v -> showPasswordChangeDialog());
+        profileImageView.setOnClickListener(v -> showFullImageDialog());
+
+        addProfilePicture.setOnClickListener(v -> openFileChooser());
+
+        S3ClientManager.initialize(
+                this,
+                "AKIAXTORPPDQTN2Z6XFC",
+                "kgKBIgXLwLZXfBE18mZTS614l9rgAx/l6WTnabtZ",
+                "ap-southeast-2"
+        );
+
 
         spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -102,51 +133,237 @@ public class ProfileEditActivity extends Activity {
         Updatebutton.setOnClickListener(view -> updateProfile());
 
 
-
         fetchUserdata();
     }
 
 
-    private void fetchUserdata(){
+    private void fetchUserdata() {
         String uid = firebaseAuth.getCurrentUser().getUid();
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()){
+                    if (documentSnapshot.exists()) {
                         String username = documentSnapshot.getString("username");
                         String status = documentSnapshot.getString("status");
-                        String firstName = documentSnapshot.getString("first name");
-                        String lastName = documentSnapshot.getString("last name");
+                        profileImageUrl = documentSnapshot.getString("profileImageUrl");
 
+                        // Debugging logs
+                        Log.d("ProfileEditActivity", "Fetched Profile Image URL: " + profileImageUrl);
 
-
+                        // Load the data into the UI
                         editText.setText(username);
-                        if (status !=  null){
-                            int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus. getAdapter()).getPosition(status);
+                        if (status != null) {
+                            int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus.getAdapter()).getPosition(status);
                             spinnerStatus.setSelection(spinnerPosition);
                         }
-                        String userInfoText = "name: " + firstName + "" + lastName + "\nUsername: " + username + "\nstatus: " + status;
-                        userInfo.setText(userInfoText);
+                        if (profileImageUrl != null) {
+                            Glide.with(this).load(profileImageUrl).into(profileImageView);
+
+                            // Add click listener for full image view
+                            profileImageView.setOnClickListener(v -> showFullImageDialog());
+                        } else {
+                            Log.e("ProfileEditActivity", "Profile Image URL is null.");
+                        }
                     } else {
-                        Toast.makeText(ProfileEditActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+                        Log.e("ProfileEditActivity", "User document does not exist.");
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error fetching user data", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Log.e("ProfileEditActivity", "Error fetching user data: " + e.getMessage()));
     }
+
 
     private void updateProfile() {
         String uid = firebaseAuth.getCurrentUser().getUid();
         String newUsername = editText.getText().toString().trim();
+        String newGender = pfp_Edit_Gender.getText().toString().trim();
 
-        if (newUsername.isEmpty()){
+        if (newUsername.isEmpty()) {
             editText.setError("Username is Required");
             editText.requestFocus();
             return;
         }
 
+        if (newGender.isEmpty()) {
+            editText.setError("Gender is Required");
+            editText.requestFocus();
+            return;
+        }
+
         db.collection("users").document(uid)
-                .update("status", selectedStatus, "username", newUsername)
-                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Status updated successfully", Toast.LENGTH_SHORT).show())
+                .update("status", selectedStatus, "username", newUsername, "gender", newGender)
+                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating status", Toast.LENGTH_SHORT).show());
     }
 
+    private void openFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
+            profileImageView.setImageURI(imageUri);
+            uploadImageToS3(imageUri);
+        }
+
+    }
+
+    private void uploadImageToS3(Uri imageUri) {
+        if (imageUri != null) {
+            try {
+                // Convert URI to File
+                String userId = firebaseAuth.getCurrentUser().getUid();
+                String fileName = "profile_images/" + userId + ".jpg";
+                File file = new File(getCacheDir(), "tempImage.jpg");
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                FileOutputStream out = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                out.close();
+
+                // Upload to S3
+                TransferUtility transferUtility = S3ClientManager.getTransferUtility();
+                TransferObserver uploadObserver = transferUtility.upload(
+                        "nu-pingmate",
+                        fileName,
+                        file
+                );
+
+                // Add listeners for upload progress
+                uploadObserver.setTransferListener(new TransferListener() {
+                    @Override
+                    public void onStateChanged(int id, TransferState state) {
+                        if (state == TransferState.COMPLETED) {
+                            Toast.makeText(ProfileEditActivity.this, "Upload successful", Toast.LENGTH_SHORT).show();
+                            String imageUrl = "https://nu-pingmate.s3.amazonaws.com/" + fileName;
+                            updateProfileImageUrl(imageUrl);
+                        } else if (state == TransferState.FAILED) {
+                            Toast.makeText(ProfileEditActivity.this, "Upload failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                        double progress = (double) bytesCurrent / bytesTotal * 100;
+                        Log.d("S3 Upload", "Progress: " + progress + "%");
+                    }
+
+                    @Override
+                    public void onError(int id, Exception ex) {
+                        Log.e("S3 Upload", "Error: " + ex.getMessage());
+                    }
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(ProfileEditActivity.this, "No image selected", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
+    private void updateProfileImageUrl(String imageUrl) {
+        String uid = firebaseAuth.getCurrentUser().getUid();
+        db.collection("users").document(uid)
+                .update("profileImageUrl", imageUrl)
+                .addOnSuccessListener(aVoid -> {
+                    profileImageUrl = imageUrl; // Update the global variable
+                    Toast.makeText(ProfileEditActivity.this, "Profile image updated successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating profile image", Toast.LENGTH_SHORT).show());
+    }
+    private void showFullImageDialog() {
+        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_full_image, null);
+            builder.setView(dialogView);
+
+            ImageView fullImageView = dialogView.findViewById(R.id.fullImageView);
+            Button closeButton = dialogView.findViewById(R.id.closeButton);
+
+            // Load the image using Glide
+            Glide.with(this)
+                    .load(profileImageUrl)
+                    .into(fullImageView);
+
+            AlertDialog dialog = builder.create();
+            closeButton.setOnClickListener(v -> dialog.dismiss());
+            dialog.show();
+        } else {
+            Toast.makeText(this, "No profile image found", Toast.LENGTH_SHORT).show();
+            Log.e("ProfileEditActivity", "Cannot show full image - profileImageUrl is null or empty.");
+        }
+    }
+    // Show the Password Change Dialog
+    private void showPasswordChangeDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_change_password, null);
+        builder.setView(dialogView);
+
+        EditText etCurrentPassword = dialogView.findViewById(R.id.etCurrentPassword);
+        EditText etNewPassword = dialogView.findViewById(R.id.etNewPassword);
+        EditText etConfirmPassword = dialogView.findViewById(R.id.etConfirmPassword);
+        Button btnSubmitChange = dialogView.findViewById(R.id.btnSubmitChange);
+
+
+        AlertDialog dialog = builder.create();
+
+        btnSubmitChange.setOnClickListener(v -> {
+            String currentPassword = etCurrentPassword.getText().toString().trim();
+            String newPassword = etNewPassword.getText().toString().trim();
+            String confirmPassword = etConfirmPassword.getText().toString().trim();
+
+            if (currentPassword.isEmpty() || newPassword.isEmpty()) {
+                Toast.makeText(ProfileEditActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                return;
+
+            }
+            if (confirmPassword.isEmpty()) {
+                Toast.makeText(ProfileEditActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                return;
+
+            }
+
+            changePassword(currentPassword, newPassword, confirmPassword, dialog);
+        });
+
+        dialog.show();
+    }
+
+    // Handle Password Change Logic
+    private void changePassword(String currentPassword, String newPassword, String confirmPassword, AlertDialog dialog) {
+        String email = firebaseAuth.getCurrentUser().getEmail();
+
+        // Reauthenticate the user with their current password
+        firebaseAuth.signInWithEmailAndPassword(email, currentPassword)
+                .addOnSuccessListener(authResult -> {
+                    // If reauthentication is successful, update the password
+                    if (newPassword.equals(confirmPassword)) {
+                        firebaseAuth.getCurrentUser().updatePassword(newPassword)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(ProfileEditActivity.this, "Password changed successfully", Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                })
+                                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Failed to update password: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    }else{
+                        Toast.makeText(ProfileEditActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Current password is incorrect", Toast.LENGTH_SHORT).show());
+    }
+
+
+
+
 }
+
+
+
+

@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.Objects;
 
 public class SignUpActivity extends AppCompatActivity{
-    private EditText SignupFirstName, SignupLastName, SignupMiddleName, SignupUsername, SignupEmail, SignupPassword, SignupRe_Password, DateOfBirth;
+    private EditText SignupFirstName, SignupLastName, SignupMiddleName, SignupUsername, SignupEmail, SignupPassword, SignupRe_Password, DateOfBirth, SignupGender;
     private Button btnSignUp, btnBack;
     private FirebaseAuth mAtuh;
     private FirebaseFirestore Firestore;
@@ -52,6 +52,7 @@ public class SignUpActivity extends AppCompatActivity{
         SignupEmail = findViewById(R.id.SignupEmail);
         SignupPassword = findViewById(R.id.SignupPassword);
         SignupRe_Password = findViewById(R.id.SignupRe_Password);
+        SignupGender = findViewById(R.id.SignupGender);
         DateOfBirth = findViewById(R.id.DateOfBirth);
         btnSignUp = findViewById(R.id.btnSignUp);
         btnBack = findViewById(R.id.btnBack);
@@ -73,6 +74,7 @@ public class SignUpActivity extends AppCompatActivity{
         String password = SignupPassword.getText().toString().trim();
         String Repass = SignupRe_Password.getText().toString().trim();
         String DoB = DateOfBirth.getText().toString().trim();
+        String Gender = SignupGender.getText().toString().trim();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
 
@@ -98,6 +100,12 @@ public class SignUpActivity extends AppCompatActivity{
         if (TextUtils.isEmpty(username)){
             SignupUsername.setError("You must enter your desired username");
             SignupUsername.requestFocus();
+            return;
+        }
+
+        if (TextUtils.isEmpty(Gender)) {
+            SignupGender.setError("You must enter your gender");
+            SignupGender.requestFocus();
             return;
         }
 
@@ -176,6 +184,7 @@ public class SignUpActivity extends AppCompatActivity{
                                 userMap.put("username", username);
                                 userMap.put("email", email);
                                 userMap.put("Birth day", DoB);
+                                userMap.put("Gender", Gender);
 
                                 Firestore.collection("users").document(firebaseUser.getUid())
                                         .set(userMap)
