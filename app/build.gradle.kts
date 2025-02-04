@@ -53,6 +53,19 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.0.0")
     implementation("com.google.android.material:material:1.9.0")
     implementation ("com.google.firebase:firebase-auth:21.0.5")  // For Firebase Authentication
-    implementation ("com.google.firebase:firebase-firestore:24.0.1")  // For Firestore
-    implementation ("com.google.firebase:firebase-messaging:23.1.1")  // For FCM
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation ("com.google.firebase:firebase-storage:20.2.1")
+    implementation ("com.google.firebase:firebase-auth:22.1.0")
+    implementation ("com.google.firebase:firebase-firestore:24.4.2")
+    implementation ("com.amazonaws:aws-android-sdk-s3:2.66.0")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+
+
+
+    // For FCM
 }

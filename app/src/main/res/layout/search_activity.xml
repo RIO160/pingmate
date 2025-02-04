@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center"
+    android:background="@drawable/gradient2_color">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/searchTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Find a Match"
+        android:textSize="22sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+
+        android:layout_gravity="center"
+        android:paddingBottom="16dp"/>
+
+    <!-- Gender Selection -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Preferred Gender:"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:paddingBottom="8dp"/>
+
+    <RadioGroup
+        android:id="@+id/genderRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioMale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Male"/>
+
+        <RadioButton
+            android:id="@+id/radioFemale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Female"/>
+
+        <RadioButton
+            android:id="@+id/radioAny"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Any"
+            android:checked="true"/>
+    </RadioGroup>
+
+    <!-- Search Button -->
+    <Button
+        android:id="@+id/searchBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search for a Match"
+        android:backgroundTint="#005F83"
+        android:textColor="@android:color/white"
+        android:padding="12dp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"/>
+
+    <!-- back Button -->
+    <Button
+        android:id="@+id/BackBtn"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="back"
+        android:backgroundTint="#005F83"
+        android:textColor="@android:color/white"
+        android:padding="12dp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"/>
+
+    <!-- ProgressBar (Hidden by Default) -->
+    <ProgressBar
+        android:id="@+id/searchProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        android:indeterminate="true"/>
+
+    <!-- Match Result (Hidden Initially) -->
+    <TextView
+        android:id="@+id/matchResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No match found yet."
+        android:textSize="18sp"
+        android:visibility="gone"
+        android:paddingTop="16dp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"/>
+
+</LinearLayout>

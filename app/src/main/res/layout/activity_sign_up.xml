@@ -107,13 +107,29 @@
                 />
 
             <EditText
+                android:id="@+id/SignupGender"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:hint="Gender"
+                android:inputType="text"
+                android:layout_marginTop="16dp"
+                android:layout_below="@+id/SignupMiddleName"
+                android:padding="5dp"
+                android:background="@drawable/roundsu_corner"
+                android:textColorHint="#80ffffff"
+                android:drawableStart="@drawable/image_user"
+                android:drawablePadding="8dp"
+                android:textSize="20dp"
+                />
+
+            <EditText
                 android:id="@+id/SignupEmail"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:hint="Email Address"
                 android:inputType="textEmailAddress"
                 android:layout_marginTop="16dp"
-                android:layout_below="@+id/SignupUsername"
+                android:layout_below="@+id/SignupGender"
                 android:padding="5dp"
                 android:background="@drawable/roundsu_corner"
                 android:textColorHint="#80ffffff"
