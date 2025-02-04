@@ -83,7 +83,11 @@
             android:textColor="#ffffff"
             android:textColorHint="#80ffffff"
             android:padding="10dp"
-            android:background="@drawable/round_corners" />
+            android:background="@drawable/round_corners"
+            android:maxLines="5"
+            android:scrollbars="vertical"
+            android:overScrollMode="ifContentScrolls"
+            android:inputType="textMultiLine" />
 
         <ImageButton
             android:id="@+id/sendButton"
