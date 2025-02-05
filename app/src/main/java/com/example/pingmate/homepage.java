@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.List;
@@ -122,9 +123,7 @@ public class homepage extends AppCompatActivity {
                 });
     }
 
-
-
-    private void fetchUsers(){
+    private void fetchUsers() {
         String currentUserId = firebaseAuth.getCurrentUser().getUid();
 
         db.collection("users").get()
@@ -135,23 +134,118 @@ public class homepage extends AppCompatActivity {
                         Users user = document.toObject(Users.class);
 
                         if (user != null) {
-                            // Use Firestore's document ID as the user ID
                             user.setId(document.getId());
-                            user.setMatchedMessage(document.getString("matchedMessage"));
 
-                            // Exclude the current logged-in user
                             if (!user.getId().equals(currentUserId)) {
-                                allUsers.add(user);
+                                checkForExistingMessages(user, allUsers);
+                                //fetchLatestMessage(user, allUsers);
                             }
                         }
                     }
-
-                    userList.clear();
-                    userList.addAll(allUsers);
-                    userAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error fetching users", e));
     }
+
+    private void checkForExistingMessages(Users user, List<Users> allUsers) {
+        String currentUserId = firebaseAuth.getCurrentUser().getUid();
+        String chatId = currentUserId.compareTo(user.getId()) < 0 ? currentUserId + "_" + user.getId() : user.getId() + "_" + currentUserId;
+
+        db.collection("chats").document(chatId).collection("messages")
+                .orderBy(("timestamp"), Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String latestMessage = document.getString("message");
+                        user.setLatestMessage(latestMessage);
+                        allUsers.add(user);
+                        userList.clear();
+                        userList.addAll(allUsers);
+                        userAdapter.notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error checking for existing messages", e));
+    }
+
+//    private void fetchUsers() {
+//        String currentUserId = firebaseAuth.getCurrentUser().getUid();
+//
+//        db.collection("users").get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> {
+//                    List<Users> allUsers = new ArrayList<>();
+//
+//                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+//                        Users user = document.toObject(Users.class);
+//
+//                        if (user != null) {
+//                            user.setId(document.getId());
+//                            user.setMatchedMessage(document.getString("matchedMessage"));
+//
+//                            if (!user.getId().equals(currentUserId)) {
+//                                fetchLatestMessage(user, allUsers);
+//                            }
+//                        }
+//                    }
+//                })
+//                .addOnFailureListener(e -> Log.e("Firestore", "Error fetching users", e));
+//    }
+
+//    private void fetchLatestMessage(Users user, List<Users> allUsers) {
+//        String currentUserId = firebaseAuth.getCurrentUser().getUid();
+//        String chatId = currentUserId.compareTo(user.getId()) < 0 ? currentUserId + "_" + user.getId() : user.getId() + "_" + currentUserId;
+//
+//        db.collection("chats").document(chatId).collection("messages")
+//                .orderBy("timestamp", Query.Direction.DESCENDING)
+//                .limit(1)
+//                .get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> {
+//                    if (!queryDocumentSnapshots.isEmpty()) {
+//                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+//                        String latestMessage = document.getString("message");
+//                        user.setLatestMessage(latestMessage);
+//                    } else {
+//                        user.setLatestMessage("No messages yet");
+//                    }
+//
+//                    allUsers.add(user);
+//                    userList.clear();
+//                    userList.addAll(allUsers);
+//                    userAdapter.notifyDataSetChanged();
+//                })
+//                .addOnFailureListener(e -> Log.e("Firestore", "Error fetching latest message", e));
+//    }
+
+
+
+//    private void fetchUsers(){
+//        String currentUserId = firebaseAuth.getCurrentUser().getUid();
+//
+//        db.collection("users").get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> {
+//                    List<Users> allUsers = new ArrayList<>();
+//
+//                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+//                        Users user = document.toObject(Users.class);
+//
+//                        if (user != null) {
+//                            // Use Firestore's document ID as the user ID
+//                            user.setId(document.getId());
+//                            user.setMatchedMessage(document.getString("matchedMessage"));
+//
+//                            // Exclude the current logged-in user
+//                            if (!user.getId().equals(currentUserId)) {
+//                                allUsers.add(user);
+//                            }
+//                        }
+//                    }
+//
+//                    userList.clear();
+//                    userList.addAll(allUsers);
+//                    userAdapter.notifyDataSetChanged();
+//                })
+//                .addOnFailureListener(e -> Log.e("Firestore", "Error fetching users", e));
+//    }
 
     private void fetchGroupChats(FirebaseFirestore db){
         db.collection("groups")
