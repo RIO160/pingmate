@@ -26,14 +26,25 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/emailTextView"
+        android:id="@+id/latestMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/profilePic"
+        android:textSize="14sp"
         android:layout_below="@+id/usernameTextView"
-        android:text="Email"
-        android:textColor="@color/white"
-        android:textSize="14sp" />
+        android:layout_toRightOf="@+id/profilePic"
+        android:text="Latest Message"
+        android:textColor="@android:color/white" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/emailTextView"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_toRightOf="@+id/profilePic"-->
+<!--        android:layout_below="@+id/usernameTextView"-->
+<!--        android:text="Email"-->
+<!--        android:textColor="@color/white"-->
+<!--        android:textSize="14sp" />-->
+
     <TextView
         android:id="@+id/unreadBadge"
         android:layout_width="wrap_content"

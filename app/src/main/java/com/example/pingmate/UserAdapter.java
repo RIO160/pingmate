@@ -37,10 +37,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public void onBindViewHolder(UserViewHolder holder, int position) {
         Users user = userList.get(position);
         holder.username.setText(user.getUsername());
-        holder.email.setText((user.getEmail()));
+        //holder.email.setText((user.getEmail()));
+        holder.lastestMessage.setText(user.getLatestMessage());
 
         //handlee click event
         holder.itemView.setOnClickListener(view -> onUserClickListener.onUserClick(user));
+
         // Load the profile image into the ImageView (circular crop if available)
         String profileImageUrl = user.getProfileImageUrl(); // Get profile image URL (AWS S3)
         if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
@@ -71,12 +73,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         public static class UserViewHolder extends RecyclerView.ViewHolder {
             TextView username;
             TextView email;
+            TextView lastestMessage;
             ImageView profilePic;
 
             public UserViewHolder(View itemView) {
                 super(itemView);
                 username = itemView.findViewById(R.id.usernameTextView);
-                email = itemView.findViewById(R.id.emailTextView);
+                //email = itemView.findViewById(R.id.emailTextView);
+                lastestMessage = itemView.findViewById(R.id.latestMessage);
                 profilePic = itemView.findViewById(R.id.profilePic);
             }
         }

@@ -51,6 +51,7 @@ public class ChatActivity extends AppCompatActivity {
 
         // Get the username and receiverId passed from the previous activity
         String username = getIntent().getStringExtra("clickedUsername");
+        String matchedUser = getIntent().getStringExtra("matchedUser");
         String receiverId = getIntent().getStringExtra("receiverId");
         loadReceiverProfileImage(receiverId);
 
@@ -63,7 +64,10 @@ public class ChatActivity extends AppCompatActivity {
 
         // Set the username at the top of the screen
         TextView usernameTextView = findViewById(R.id.chatUsername);
+        //TextView matchedUserTextView = findViewById(R.id.matchedUser);
         usernameTextView.setText(username);
+        //matchedUserTextView.setText(matchedUser);
+
 
         firebaseAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();

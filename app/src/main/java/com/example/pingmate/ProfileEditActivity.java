@@ -46,11 +46,11 @@ import java.util.ArrayList;
 
 public class ProfileEditActivity extends Activity {
     private Button Backbutton, Updatebutton;
-    private EditText editText, pfp_Edit_Gender;
-    private Spinner spinnerStatus;
+    private EditText editText;
+    private Spinner spinnerStatus, pfp_Edit_Gender;
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
-    private String selectedStatus;
+    private String selectedStatus, selectedGender;
     private String profileImageUrl;
     private ImageView profileImageView, addProfilePicture;
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -61,7 +61,6 @@ public class ProfileEditActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_edit);
 
-        pfp_Edit_Gender = findViewById(R.id.pfp_Edit_Gender);
 
         FirebaseApp.initializeApp(this);
 
@@ -75,11 +74,18 @@ public class ProfileEditActivity extends Activity {
         spinnerStatus = findViewById(R.id.spinnerStatus);
         TextView tvStatus = findViewById(R.id.tvStatus);
         editText = findViewById(R.id.pfp_Edit_username);
+        pfp_Edit_Gender = findViewById(R.id.pfp_Edit_Gender);
 
         String[] statusOptions = {"Online", "Offline", "Busy", "Do Not Disturb"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statusOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
+
+        String[] genderOptions = {"Male", "Female", "Other"};
+        ArrayAdapter<String> genderAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, genderOptions);
+        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        pfp_Edit_Gender.setAdapter(genderAdapter);
+
         Button Updatebutton = findViewById(R.id.updateBtn);
         Updatebutton.setOnClickListener(v -> updateProfile());
         Button btnChangePassword = findViewById(R.id.btnChangePassword);
@@ -94,6 +100,18 @@ public class ProfileEditActivity extends Activity {
                 "kgKBIgXLwLZXfBE18mZTS614l9rgAx/l6WTnabtZ",
                 "ap-southeast-2"
         );
+
+        pfp_Edit_Gender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedGender = genderOptions[position];
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
 
 
         spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -174,7 +192,7 @@ public class ProfileEditActivity extends Activity {
     private void updateProfile() {
         String uid = firebaseAuth.getCurrentUser().getUid();
         String newUsername = editText.getText().toString().trim();
-        String newGender = pfp_Edit_Gender.getText().toString().trim();
+        //String newGender = pfp_Edit_Gender.getText().toString().trim();
 
         if (newUsername.isEmpty()) {
             editText.setError("Username is Required");
@@ -182,14 +200,19 @@ public class ProfileEditActivity extends Activity {
             return;
         }
 
-        if (newGender.isEmpty()) {
-            editText.setError("Gender is Required");
-            editText.requestFocus();
+        if (selectedGender == null || selectedGender.isEmpty()) {
+            Toast.makeText(this, "Gender is Required", Toast.LENGTH_SHORT).show();
             return;
         }
 
+//        if (newGender.isEmpty()) {
+//            editText.setError("Gender is Required");
+//            editText.requestFocus();
+//            return;
+//        }
+
         db.collection("users").document(uid)
-                .update("status", selectedStatus, "username", newUsername, "gender", newGender)
+                .update("status", selectedStatus, "username", newUsername, "gender", selectedGender)
                 .addOnSuccessListener(aVoid -> Toast.makeText(ProfileEditActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(ProfileEditActivity.this, "Error updating status", Toast.LENGTH_SHORT).show());
     }

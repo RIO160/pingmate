@@ -51,6 +51,18 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
+<!--        <TextView-->
+<!--            android:id="@+id/matchedUser"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="10dp"-->
+<!--            android:layout_marginLeft="7dp"-->
+<!--            android:layout_toRightOf="@id/profileImageView"-->
+<!--            android:text="Username"-->
+<!--            android:textColor="#000000"-->
+<!--            android:textSize="25sp"-->
+<!--            android:textStyle="bold" />-->
+
         <ImageView
             android:id="@+id/statusCircle"
             android:layout_width="30dp"

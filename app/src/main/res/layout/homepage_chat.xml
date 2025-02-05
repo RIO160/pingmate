@@ -12,6 +12,7 @@
         android:id="@+id/profiletab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="10dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -57,16 +58,19 @@
         android:id="@+id/chatContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginBottom="30dp"
         android:background="@drawable/chat_background"
         android:backgroundTint="#004481"
         app:layout_constraintTop_toBottomOf="@id/profiletab"
         app:layout_constraintBottom_toTopOf="@id/fabNewChat">
 
+        <!-- Chat Toolbar -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/userRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="20dp"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Floating Action Button -->
@@ -74,12 +78,15 @@
         android:id="@+id/fabNewChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingRight="50dp"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/round_add_24"
+        android:src="@drawable/search"
         android:backgroundTint="@color/white"
         app:tint="@color/black"
         app:shapeAppearanceOverlay="@style/CustomFABShape"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

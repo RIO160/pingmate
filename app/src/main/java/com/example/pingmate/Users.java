@@ -10,18 +10,27 @@ public class Users implements UserAdapter.ChatItem {
     private String matchedMessage;
     private String fcmToken;
     private String profileImageUrl;
+    private String latestMessage;
 
     public Users() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public Users(String username, String email, String userId, String chatId, String id, String matchedMessage) {
+    public Users(String username, String email, String userId, String chatId, String id, String matchedMessage, String latestMessage) {
         this.username = username;
         this.email = email;
         this.userId = userId;
         this.chatId = chatId;
         this.id = id;
         this.matchedMessage = matchedMessage;
+    }
+
+    public String getLatestMessage() {
+        return latestMessage;
+    }
+
+    public void setLatestMessage(String latestMessage) {
+        this.latestMessage = latestMessage;
     }
 
     public String getUsername() {
