@@ -310,10 +310,12 @@ public class ProfileEditActivity extends Activity {
 
             ImageView fullImageView = dialogView.findViewById(R.id.fullImageView);
             Button closeButton = dialogView.findViewById(R.id.closeButton);
+            Log.d("ProfileEditActivity", "Profile Image URL: " + profileImageUrl);
 
             // Load the image using Glide
             Glide.with(this)
                     .load(profileImageUrl)
+                    .placeholder(R.drawable.image_user2)
                     .into(fullImageView);
 
             AlertDialog dialog = builder.create();
