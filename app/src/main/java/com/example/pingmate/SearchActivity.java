@@ -146,7 +146,7 @@ public class SearchActivity extends AppCompatActivity {
                                 Intent intent = new Intent(SearchActivity.this, ChatActivity.class);
                                 intent.putExtra("clickedUsername", matchedUser);
                                 intent.putExtra("receiverId", receiverId);
-                            }, 7000);
+                            }, 5000);
                         })
                         .addOnFailureListener(e -> Toast.makeText(SearchActivity.this, "Error saving match message", Toast.LENGTH_SHORT).show());
             }
