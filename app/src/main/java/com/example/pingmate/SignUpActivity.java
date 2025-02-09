@@ -31,7 +31,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
-public class SignUpActivity extends AppCompatActivity{
+public class SignUpActivity extends AppCompatActivity {
     private EditText SignupFirstName, SignupLastName, SignupMiddleName, SignupUsername, SignupEmail, SignupPassword, SignupRe_Password, DateOfBirth, SignupGender;
     private Button btnSignUp, btnBack;
     private FirebaseAuth mAtuh;
@@ -64,40 +64,38 @@ public class SignUpActivity extends AppCompatActivity{
     }
 
 
-
     private void registeruser() {
         String Fn = SignupFirstName.getText().toString().trim();
         String Ln = SignupLastName.getText().toString().trim();
         String Mn = SignupMiddleName.getText().toString().trim();
         String username = SignupUsername.getText().toString().trim();
-        String email =  SignupEmail.getText().toString().trim();
+        String email = SignupEmail.getText().toString().trim();
         String password = SignupPassword.getText().toString().trim();
         String Repass = SignupRe_Password.getText().toString().trim();
         String DoB = DateOfBirth.getText().toString().trim();
         String Gender = SignupGender.getText().toString().trim();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
-
-
-        if (TextUtils.isEmpty(Fn)){
+        // Validation checks for user inputs
+        if (TextUtils.isEmpty(Fn)) {
             SignupFirstName.setError("You must enter your first name!");
             SignupFirstName.requestFocus();
             return;
         }
 
-        if (TextUtils.isEmpty(Ln)){
+        if (TextUtils.isEmpty(Ln)) {
             SignupLastName.setError("You must enter your last name!");
             SignupLastName.requestFocus();
             return;
         }
 
-        if (TextUtils.isEmpty(Mn)){
+        if (TextUtils.isEmpty(Mn)) {
             SignupMiddleName.setError("You must enter your middle name!");
             SignupMiddleName.requestFocus();
             return;
         }
 
-        if (TextUtils.isEmpty(username)){
+        if (TextUtils.isEmpty(username)) {
             SignupUsername.setError("You must enter your desired username");
             SignupUsername.requestFocus();
             return;
@@ -109,13 +107,13 @@ public class SignUpActivity extends AppCompatActivity{
             return;
         }
 
-        if (TextUtils.isEmpty(email)){
+        if (TextUtils.isEmpty(email)) {
             SignupEmail.setError("Email is required");
             SignupEmail.requestFocus();
             return;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             SignupEmail.setError("Please provide a valid email");
             SignupEmail.requestFocus();
             return;
@@ -127,20 +125,22 @@ public class SignUpActivity extends AppCompatActivity{
             return;
         }
 
-        if (password.length() < 8){
+        if (password.length() < 8) {
             SignupPassword.setError("Password must be at least 8 characters");
             SignupPassword.requestFocus();
             return;
         }
 
-        if (TextUtils.isEmpty(Repass)){
-            SignupRe_Password.setError("confirm your password");
+        if (TextUtils.isEmpty(Repass)) {
+            SignupRe_Password.setError("Confirm your password");
             SignupRe_Password.requestFocus();
+            return;
         }
 
-        if (!Repass.equals(password)){
-            SignupRe_Password.setError("password do not match!");
+        if (!Repass.equals(password)) {
+            SignupRe_Password.setError("Passwords do not match!");
             SignupRe_Password.requestFocus();
+            return;
         }
 
         try {
@@ -149,60 +149,78 @@ public class SignUpActivity extends AppCompatActivity{
             dobCalendar.setTime(dateOfBirth);
 
             Calendar today = Calendar.getInstance();
-
             int age = today.get(Calendar.YEAR) - dobCalendar.get(Calendar.YEAR);
 
-            if(today.get(Calendar.DAY_OF_YEAR) < dobCalendar.get(Calendar.DAY_OF_YEAR)){
+            if (today.get(Calendar.DAY_OF_YEAR) < dobCalendar.get(Calendar.DAY_OF_YEAR)) {
                 age--;
             }
 
-            if (age < 18) {
-                DateOfBirth.setError("your age does not meet out policy");
+            if (age < 16) {
+                DateOfBirth.setError("Your age does not meet our policy");
                 DateOfBirth.requestFocus();
+                return;
             }
 
         } catch (ParseException e) {
-            DateOfBirth.setError("please enter a valid date of birth");
+            DateOfBirth.setError("Please enter a valid date of birth");
             DateOfBirth.requestFocus();
+            return;
         }
 
-        mAtuh.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(SignUpActivity.this, "registration successfull", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                            FirebaseUser firebaseUser = mAtuh.getCurrentUser();
-
-                            if (firebaseUser != null){
-                                Map<String, Object> userMap = new HashMap<>();
-                                userMap.put("uid", firebaseUser.getUid());
-                                userMap.put("first name", Fn);
-                                userMap.put("last name", Ln);
-                                userMap.put("middle name", Mn);
-                                userMap.put("username", username);
-                                userMap.put("email", email);
-                                userMap.put("Birth day", DoB);
-                                userMap.put("Gender", Gender);
-
-                                Firestore.collection("users").document(firebaseUser.getUid())
-                                        .set(userMap)
-                                        .addOnSuccessListener(aVoid -> {
-                                            Toast.makeText(SignUpActivity.this, "User signed up successfully", Toast.LENGTH_SHORT).show();
-                                        })
-
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(SignUpActivity.this, "Failed to save user data", Toast.LENGTH_SHORT).show();
-                                            Log.e("Firestore", "Error saving user data", e);
-                                        });
-                            }
-                            finish();
-                        } else {
-                            Toast.makeText(SignUpActivity.this, "Registration failed: " + task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        }
+        // Check if username exists in Firestore
+        Firestore.collection("users").whereEqualTo("username", username).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        SignupUsername.setError("Username already taken. Please choose another.");
+                        SignupUsername.requestFocus();
+                    } else {
+                        // Check if email already exists in Firebase Auth
+                        mAtuh.fetchSignInMethodsForEmail(email)
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful() && !Objects.requireNonNull(task1.getResult().getSignInMethods()).isEmpty()) {
+                                        SignupEmail.setError("Email already in use. Please choose another.");
+                                        SignupEmail.requestFocus();
+                                    } else {
+                                        createUserInFirebaseAuth(email, password, Fn, Ln, Mn, username, DoB, Gender);
+                                    }
+                                });
                     }
                 });
     }
+
+    private void createUserInFirebaseAuth(String email, String password, String Fn, String Ln, String Mn, String username, String DoB, String Gender) {
+        mAtuh.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(SignUpActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                        FirebaseUser firebaseUser = mAtuh.getCurrentUser();
+
+                        if (firebaseUser != null) {
+                            Map<String, Object> userMap = new HashMap<>();
+                            userMap.put("uid", firebaseUser.getUid());
+                            userMap.put("first name", Fn);
+                            userMap.put("last name", Ln);
+                            userMap.put("middle name", Mn);
+                            userMap.put("username", username);
+                            userMap.put("email", email);
+                            userMap.put("Birth day", DoB);
+                            userMap.put("Gender", Gender);
+
+                            Firestore.collection("users").document(firebaseUser.getUid())
+                                    .set(userMap)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(SignUpActivity.this, "User signed up successfully", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(SignUpActivity.this, "Failed to save user data", Toast.LENGTH_SHORT).show();
+                                        Log.e("Firestore", "Error saving user data", e);
+                                    });
+                        }
+                        finish();
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 }
