@@ -23,6 +23,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         ImageView splashLogo = findViewById(R.id.splashLogo);
+        ImageView text = findViewById(R.id.pingMateText);
 
 
         // Load animations
@@ -32,6 +33,7 @@ public class SplashActivity extends AppCompatActivity {
         // Apply animations
         splashLogo.startAnimation(scale);
         splashLogo.startAnimation(fadeIn);
+        text.startAnimation(scale);
 
         splashSound = MediaPlayer.create(this, R.raw.splash_sound);
         splashSound.start();
