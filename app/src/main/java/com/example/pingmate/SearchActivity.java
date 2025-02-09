@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.media.AudioAttributes;
+import android.media.Image;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -231,11 +233,13 @@ public class SearchActivity extends AppCompatActivity {
     private void showMatchAnimation(String receiverId, String matchedUserName) {
         ImageView profileImage1 = findViewById(R.id.profileImage1);
         ImageView profileImage2 = findViewById(R.id.profileImage2);
-        TextView matchText = findViewById(R.id.matchText);
+        ImageView matchText = findViewById(R.id.matchText);
+        LinearLayout matchSection = findViewById(R.id.matchSection);
 
         profileImage1.setVisibility(View.VISIBLE);
         profileImage2.setVisibility(View.VISIBLE);
         matchText.setVisibility(View.VISIBLE);
+        matchSection.setVisibility(View.VISIBLE);
 
 
         // Fetch sender's profile image (current user)
@@ -283,7 +287,7 @@ public class SearchActivity extends AppCompatActivity {
     private void animateMatchFound(Runnable onComplete) {
         ImageView profileImage1 = findViewById(R.id.profileImage1);
         ImageView profileImage2 = findViewById(R.id.profileImage2);
-        TextView matchText = findViewById(R.id.matchText);
+        ImageView matchText = findViewById(R.id.matchText);
 
         // Clear any previous animations
         profileImage1.clearAnimation();

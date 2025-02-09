@@ -71,6 +71,17 @@
             android:layout_height="match_parent"
             android:padding="20dp"/>
 
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ping_mate_logo"
+            android:alpha="0.3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintDimensionRatio="1:1" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Floating Action Button -->
@@ -88,5 +99,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

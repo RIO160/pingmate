@@ -107,37 +107,43 @@
 
     <!-- Match Text in the Center -->
 
-    <ImageView
-        android:id="@+id/profileImage1"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
-        android:layout_marginEnd="16dp"
-        android:layout_gravity="start|center_vertical"/>
-
-    <TextView
-        android:id="@+id/matchText"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🎉 It's a Match! 🎉"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@color/white"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:id="@+id/matchSection">
 
-    <!-- Profile Image 2 (Right) -->
-    <ImageView
-        android:id="@+id/profileImage2"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="end|center_vertical"
-        android:layout_marginStart="16dp"
-        android:scaleType="centerCrop"
-        android:visibility="gone" />
+        <!-- Profile Image 1 (Left) -->
+        <ImageView
+            android:id="@+id/profileImage1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Match Logo in the Center -->
+        <ImageView
+            android:id="@+id/matchText"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/ping_mate_logo"
+            android:visibility="visible"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Profile Image 2 (Right) -->
+        <ImageView
+            android:id="@+id/profileImage2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
 
 </LinearLayout>
