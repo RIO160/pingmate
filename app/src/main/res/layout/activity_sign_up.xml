@@ -106,21 +106,16 @@
                 android:textSize="20dp"
                 />
 
-            <EditText
+            <Spinner
                 android:id="@+id/SignupGender"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:hint="Gender"
-                android:inputType="text"
                 android:layout_marginTop="16dp"
-                android:layout_below="@+id/SignupMiddleName"
-                android:padding="5dp"
+                android:backgroundTint="#80ffffff"
+                android:layout_below="@+id/SignupUsername"
                 android:background="@drawable/roundsu_corner"
-                android:textColorHint="#80ffffff"
-                android:drawableStart="@drawable/image_user"
-                android:drawablePadding="8dp"
-                android:textSize="20dp"
-                />
+                android:padding="5dp"
+                android:spinnerMode="dropdown"/>
 
             <EditText
                 android:id="@+id/SignupEmail"

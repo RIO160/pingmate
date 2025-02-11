@@ -43,6 +43,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileEditActivity extends Activity {
     private Button Backbutton, Updatebutton;
@@ -81,10 +83,24 @@ public class ProfileEditActivity extends Activity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
 
-        String[] genderOptions = {"Male", "Female", "Other"};
+        String[] genderOptions = {"Select Gender", "Male", "Female", "Others"};
         ArrayAdapter<String> genderAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, genderOptions);
         genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         pfp_Edit_Gender.setAdapter(genderAdapter);
+
+        pfp_Edit_Gender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Skip the "Select Gender" option when saving
+                if (position > 0) {
+                    selectedGender = genderOptions[position];
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
 
         Button Updatebutton = findViewById(R.id.updateBtn);
         Updatebutton.setOnClickListener(v -> updateProfile());
@@ -162,6 +178,7 @@ public class ProfileEditActivity extends Activity {
                     if (documentSnapshot.exists()) {
                         String username = documentSnapshot.getString("username");
                         String status = documentSnapshot.getString("status");
+                        String gender = documentSnapshot.getString("gender");
                         profileImageUrl = documentSnapshot.getString("profileImageUrl");
 
                         // Debugging logs
@@ -172,6 +189,22 @@ public class ProfileEditActivity extends Activity {
                         if (status != null) {
                             int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus.getAdapter()).getPosition(status);
                             spinnerStatus.setSelection(spinnerPosition);
+                        }
+                        if (status != null) {
+                            int spinnerPosition = ((ArrayAdapter<String>) spinnerStatus.getAdapter()).getPosition(status);
+                            if (spinnerPosition >= 0) {
+                                spinnerStatus.setSelection(spinnerPosition);
+                            }
+                        }
+
+                        // Set gender spinner
+                        if (gender != null) {
+                            ArrayAdapter<String> adapter = (ArrayAdapter<String>) pfp_Edit_Gender.getAdapter();
+                            int genderPosition = adapter.getPosition(gender);
+                            if (genderPosition >= 0) {
+                                pfp_Edit_Gender.setSelection(genderPosition);
+                                selectedGender = gender; // Update the selected gender
+                            }
                         }
                         if (profileImageUrl != null) {
                             Glide.with(this).load(profileImageUrl).into(profileImageView);
@@ -203,7 +236,16 @@ public class ProfileEditActivity extends Activity {
         if (selectedGender == null || selectedGender.isEmpty()) {
             Toast.makeText(this, "Gender is Required", Toast.LENGTH_SHORT).show();
             return;
+
         }
+        if (pfp_Edit_Gender.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Please select a gender", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", selectedStatus);
+        updates.put("username", newUsername);
+        updates.put("gender", selectedGender);
 
 //        if (newGender.isEmpty()) {
 //            editText.setError("Gender is Required");

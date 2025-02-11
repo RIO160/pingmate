@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.text.TextUtils;
 import android.util.Patterns;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +34,8 @@ import java.util.Date;
 import java.util.Objects;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText SignupFirstName, SignupLastName, SignupMiddleName, SignupUsername, SignupEmail, SignupPassword, SignupRe_Password, DateOfBirth, SignupGender;
+    private EditText SignupFirstName, SignupLastName, SignupMiddleName, SignupUsername, SignupEmail, SignupPassword, SignupRe_Password, DateOfBirth;
+    private Spinner  SignupGender;
     private Button btnSignUp, btnBack;
     private FirebaseAuth mAtuh;
     private FirebaseFirestore Firestore;
@@ -57,11 +60,22 @@ public class SignUpActivity extends AppCompatActivity {
         btnSignUp = findViewById(R.id.btnSignUp);
         btnBack = findViewById(R.id.btnBack);
 
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(
+                this,
+                R.layout.spinner_item, // Create this layout
+                new String[]{"Select Gender", "Male", "Female", "Others"}
+        );
+
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        SignupGender.setAdapter(adapter);
+
         btnSignUp.setOnClickListener(view -> registeruser());
         btnBack.setOnClickListener(view -> {
             startActivity(new Intent(SignUpActivity.this, MainActivity.class));
         });
     }
+
 
 
     private void registeruser() {
@@ -73,8 +87,9 @@ public class SignUpActivity extends AppCompatActivity {
         String password = SignupPassword.getText().toString().trim();
         String Repass = SignupRe_Password.getText().toString().trim();
         String DoB = DateOfBirth.getText().toString().trim();
-        String Gender = SignupGender.getText().toString().trim();
+        String Gender = SignupGender.getSelectedItem().toString();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+
 
         // Validation checks for user inputs
         if (TextUtils.isEmpty(Fn)) {
@@ -101,15 +116,16 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        if (TextUtils.isEmpty(Gender)) {
-            SignupGender.setError("You must enter your gender");
-            SignupGender.requestFocus();
-            return;
-        }
 
         if (TextUtils.isEmpty(email)) {
             SignupEmail.setError("Email is required");
             SignupEmail.requestFocus();
+            return;
+        }
+
+        if (SignupGender.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Please select your gender", Toast.LENGTH_SHORT).show();
+            SignupGender.requestFocus();
             return;
         }
 
@@ -204,7 +220,9 @@ public class SignUpActivity extends AppCompatActivity {
                             userMap.put("username", username);
                             userMap.put("email", email);
                             userMap.put("Birth day", DoB);
-                            userMap.put("Gender", Gender);
+                            userMap.put("gender", Gender);
+
+
 
                             Firestore.collection("users").document(firebaseUser.getUid())
                                     .set(userMap)

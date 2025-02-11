@@ -31,6 +31,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -113,10 +114,20 @@ public class SearchActivity extends AppCompatActivity {
         if (matchFound) return;
         String preferredGender = getSelectedGender();
 
-        Query query = db.collection("users")
-                .whereEqualTo("gender", preferredGender)
-                .whereEqualTo("status", "Online")
-                .whereEqualTo("searching", true);
+        Query query;
+        if (preferredGender.equals("Any")) {
+            // For "Any", use whereIn to match either "Male" or "Female"
+            query = db.collection("users")
+                    .whereIn("gender", Arrays.asList("Male", "Female", "Other"))
+                    .whereEqualTo("status", "Online")
+                    .whereEqualTo("searching", true);
+        } else {
+            // For specific gender preference, use the original query
+            query = db.collection("users")
+                    .whereEqualTo("gender", preferredGender)
+                    .whereEqualTo("status", "Online")
+                    .whereEqualTo("searching", true);
+        }
 
         query.get().addOnSuccessListener(queryDocumentSnapshots -> {
             List<DocumentSnapshot> matchedUsers = queryDocumentSnapshots.getDocuments();
